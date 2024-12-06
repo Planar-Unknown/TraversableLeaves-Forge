@@ -13,25 +13,29 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.spongepowered.asm.mixin.Mixin;
 
-import static com.dreu.traversableleaves.config.TLConfig.LEAVES;
+import static com.dreu.traversableleaves.config.TLConfig.*;
 import static net.minecraft.world.level.block.LeavesBlock.*;
 
 @Mixin(LeavesBlock.class)
 public abstract class LeavesBlockMixin extends Block {
-    public LeavesBlockMixin(Properties p_49795_) {
-        super(p_49795_);
-        this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(DISTANCE, 7)).setValue(PERSISTENT, false)).setValue(WATERLOGGED, false));
+    public LeavesBlockMixin(Properties properties) {
+        super(properties);
+        this.registerDefaultState(this.stateDefinition.any().setValue(DISTANCE, 7).setValue(PERSISTENT, false).setValue(WATERLOGGED, false));
     }
 
     public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext context) {
-        return !isTraversable() || context.equals(CollisionContext.empty()) || (context.isAbove(Shapes.block(), blockPos, true) && !context.isDescending())
-                ? Shapes.block()
-                : Shapes.empty();
+        if (context instanceof EntityCollisionContext entityContext && entityContext.getEntity() != null){
+            return IS_ENTITIES_WHITELIST == ENTITIES.contains(ForgeRegistries.ENTITY_TYPES.getKey(entityContext.getEntity().getType())) && !(context.isAbove(Shapes.block(), blockPos, true) && !context.isDescending()) ? Shapes.empty() : Shapes.block();
+        }
+
+        return Shapes.block();
+
     }
     public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
         if (!isTraversable()) return;
@@ -47,10 +51,11 @@ public abstract class LeavesBlockMixin extends Block {
             entity.setDeltaMovement(entity.getDeltaMovement().subtract(0, entity.getDeltaMovement().y + 1, 0));
         }
     }
+
     public boolean isLadder(BlockState state, LevelReader level, BlockPos pos, LivingEntity entity) {
         return isTraversable() && entity instanceof Player player && !player.isCrouching();
     }
-    private boolean isTraversable(){
-        return LEAVES.contains(ForgeRegistries.BLOCKS.getKey(this));
+    public boolean isTraversable(){
+        return IS_LEAVES_WHITELIST == LEAVES.contains(ForgeRegistries.BLOCKS.getKey(this));
     }
 }
