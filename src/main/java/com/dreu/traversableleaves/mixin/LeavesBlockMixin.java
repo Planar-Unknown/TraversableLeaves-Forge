@@ -1,6 +1,9 @@
 package com.dreu.traversableleaves.mixin;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -46,9 +49,25 @@ public abstract class LeavesBlockMixin extends Block {
             } else {
                 player.makeStuckInBlock(blockState, new Vec3(0.6, 1.0, 0.6));
             }
-        } else if (entity instanceof LivingEntity livingEntity) {
+            createAmbience(player, blockPos);
+        } else if (entity instanceof LivingEntity) {
+            createAmbience(entity, blockPos);
             entity.resetFallDistance();
             entity.setDeltaMovement(entity.getDeltaMovement().subtract(0, entity.getDeltaMovement().y + 1, 0));
+        }
+    }
+
+    private void createAmbience(Entity entity, BlockPos blockPos){
+        if (!entity.position().equals(new Vec3(entity.xOld, entity.yOld, entity.zOld))) {
+            if (entity.level.getGameTime() % 15 == 1) {
+                entity.playSound(SoundEvents.GRASS_BREAK, 0.1f, 0.6f);
+            }
+            if (entity.level.getGameTime() % 4 == 1){
+                double d0 = (double) blockPos.getX() + entity.level.random.nextDouble();
+                double d1 = (double) blockPos.getY() + 1;
+                double d2 = (double) blockPos.getZ() + entity.level.random.nextDouble();
+                entity.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, this.defaultBlockState()), d0, d1, d2, 0, 0, 0);
+            }
         }
     }
 
