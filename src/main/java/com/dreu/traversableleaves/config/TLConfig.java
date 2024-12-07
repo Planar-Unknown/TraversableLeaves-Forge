@@ -2,7 +2,6 @@ package com.dreu.traversableleaves.config;
 
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.toml.TomlParser;
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 
 import java.io.FileWriter;
@@ -10,9 +9,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import static com.dreu.traversableleaves.TraversableLeaves.LOGGER;
 import static com.dreu.traversableleaves.TraversableLeaves.MODID;
-import static com.mojang.text2speech.Narrator.LOGGER;
 
+@SuppressWarnings("SameParameterValue")
 public class TLConfig {
     static final String defaultConfig = """
            #List of leaves (false = Blacklist)
@@ -78,12 +78,12 @@ public class TLConfig {
     static boolean getBooleanOrDefault(String key, Map.Entry<Config, String> config, Config defaultConfig) {
         try {
             if ((config.getKey().get(key) == null)) {
-                LOGGER.error("Key [" + key + "] is missing from Config: " + config.getValue());
+                LOGGER.error("Key [{}] is missing from Config: {}", key, config.getValue());
                 return defaultConfig.get(key);
             }
             return config.getKey().get(key);
         } catch (Exception e) {
-            LOGGER.error("Value for [" + key + "] is an invalid type in Config: " + config.getValue());
+            LOGGER.error("Value for [{}] is an invalid type in Config: {}", key, config.getValue());
             return defaultConfig.get(key);
         }
     }
