@@ -74,6 +74,8 @@ public class TLConfig {
     public static final boolean IS_ENTITIES_WHITELIST = getBooleanOrDefault("EntityWhitelist", CONFIG, DEFAULT_CONFIG);
 
 
+    //Todo: Make get List or Default method
+
 
     static boolean getBooleanOrDefault(String key, Map.Entry<Config, String> config, Config defaultConfig) {
         try {
