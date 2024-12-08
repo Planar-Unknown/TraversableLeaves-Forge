@@ -12,8 +12,9 @@ import java.util.*;
 import static com.dreu.traversableleaves.TraversableLeaves.LOGGER;
 import static com.dreu.traversableleaves.TraversableLeaves.MODID;
 
-@SuppressWarnings("SameParameterValue")
+@SuppressWarnings({"SameParameterValue", "unchecked"})
 public class TLConfig {
+    static final String fileName = "config/" + MODID + "/general.toml";
     static final String defaultConfig = """
            #List of leaves (false = Blacklist)
            LeavesWhitelist = true
@@ -47,46 +48,42 @@ public class TLConfig {
             "minecraft:turtle"
            ]
            """;
-    static Map.Entry<Config, String> getConfigOrDefault(String name, String defaultConfig) {
-        try {
-            Files.createDirectories(Path.of("config/" + MODID));} catch (Exception ignored) {}
-        return Map.entry(new TomlParser().parse(Path.of("config/" + MODID + "/"+ name +".toml").toAbsolutePath(),
-                ((path, configFormat) -> {
-                    FileWriter writer = new FileWriter(path.toFile().getAbsolutePath());
-                    writer.write(defaultConfig);
-                    writer.close();
-                    return true;})), "config/" + MODID + "/"+ name +".toml");
-    }
-    private static final Map.Entry<Config, String> CONFIG = getConfigOrDefault("traversable_leaves",defaultConfig);
+    private static final Config CONFIG = parseFileOrDefault();
     private static final Config DEFAULT_CONFIG = new TomlParser().parse(defaultConfig);
 
     public static final Set<ResourceLocation> LEAVES = new HashSet<>();
     public static Set<ResourceLocation> ENTITIES = new HashSet<>();
+    public static final boolean IS_LEAVES_WHITELIST = getOrDefault("LeavesWhitelist", Boolean.class);
+    public static final boolean IS_ENTITIES_WHITELIST = getOrDefault("EntityWhitelist", Boolean.class);
     static {
-        List<String> leafStrings = CONFIG.getKey().get("Traversable");
+        List<String> leafStrings = getOrDefault("Traversable", List.class);
         leafStrings.forEach((leaf) -> LEAVES.add(new ResourceLocation(leaf)));
 
-        List<String> entityStrings = CONFIG.getKey().get("Entities");
+        List<String> entityStrings = getOrDefault("Entities", List.class);
         entityStrings.forEach((entity) -> ENTITIES.add(new ResourceLocation(entity)));
     }
 
-    public static final boolean IS_LEAVES_WHITELIST = getBooleanOrDefault("LeavesWhitelist", CONFIG, DEFAULT_CONFIG);
-    public static final boolean IS_ENTITIES_WHITELIST = getBooleanOrDefault("EntityWhitelist", CONFIG, DEFAULT_CONFIG);
-
-
-    //Todo: Make get List or Default method
-
-
-    static boolean getBooleanOrDefault(String key, Map.Entry<Config, String> config, Config defaultConfig) {
+    static <T> T getOrDefault(String key, Class<T> clazz) {
         try {
-            if ((config.getKey().get(key) == null)) {
-                LOGGER.error("Key [{}] is missing from Config: {}", key, config.getValue());
-                return defaultConfig.get(key);
+            if ((CONFIG.get(key) == null)) {
+                LOGGER.error("Key [{}] is missing from Config: {}", key, fileName);
+                return clazz.cast(DEFAULT_CONFIG.get(key));
             }
-            return config.getKey().get(key);
+            return CONFIG.get(key);
         } catch (Exception e) {
-            LOGGER.error("Value for [{}] is an invalid type in Config: {}", key, config.getValue());
-            return defaultConfig.get(key);
+            LOGGER.error("Value for [{}] is an invalid type in Config: {}", key, fileName);
+            return clazz.cast(DEFAULT_CONFIG.get(key));
         }
+    }
+
+    static Config parseFileOrDefault() {
+        try {
+            Files.createDirectories(Path.of("config/" + MODID));} catch (Exception ignored) {}
+        return new TomlParser().parse(Path.of(fileName).toAbsolutePath(),
+                ((path, configFormat) -> {
+                    FileWriter writer = new FileWriter(path.toFile().getAbsolutePath());
+                    writer.write(defaultConfig);
+                    writer.close();
+                    return true;}));
     }
 }
