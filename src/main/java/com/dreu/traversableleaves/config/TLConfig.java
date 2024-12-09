@@ -16,6 +16,12 @@ import static com.dreu.traversableleaves.TraversableLeaves.MODID;
 public class TLConfig {
     static final String fileName = "config/" + MODID + "/general.toml";
     static final String defaultConfig = """
+           #Movement Speed penalty while traversing leaves, 0 = no penalty (Range : 0 - 100) (Default: 27)
+           SpeedPenalty = 27
+           
+           #Whether Armor value reduces movement penalty
+           ArmorBonus = true
+           
            #List of leaves (false = Blacklist)
            LeavesWhitelist = true
            Traversable=[
@@ -52,7 +58,9 @@ public class TLConfig {
     private static final Config DEFAULT_CONFIG = new TomlParser().parse(defaultConfig);
 
     public static final Set<ResourceLocation> LEAVES = new HashSet<>();
-    public static Set<ResourceLocation> ENTITIES = new HashSet<>();
+    public static final Set<ResourceLocation> ENTITIES = new HashSet<>();
+    public static final float MOVEMENT_PENALTY = getOrDefault("SpeedPenalty", Integer.class) * 0.021978f;
+    public static final boolean ARMOR_HELPS = getOrDefault("ArmorBonus", Boolean.class);
     public static final boolean IS_LEAVES_WHITELIST = getOrDefault("LeavesWhitelist", Boolean.class);
     public static final boolean IS_ENTITIES_WHITELIST = getOrDefault("EntityWhitelist", Boolean.class);
     static {
@@ -63,16 +71,16 @@ public class TLConfig {
         entityStrings.forEach((entity) -> ENTITIES.add(new ResourceLocation(entity)));
     }
 
-    static <T> T getOrDefault(String key, Class<T> clazz) {
+    static <T> T getOrDefault(String key, Class<T> clas) {
         try {
             if ((CONFIG.get(key) == null)) {
                 LOGGER.error("Key [{}] is missing from Config: {}", key, fileName);
-                return clazz.cast(DEFAULT_CONFIG.get(key));
+                return clas.cast(DEFAULT_CONFIG.get(key));
             }
             return CONFIG.get(key);
         } catch (Exception e) {
             LOGGER.error("Value for [{}] is an invalid type in Config: {}", key, fileName);
-            return clazz.cast(DEFAULT_CONFIG.get(key));
+            return clas.cast(DEFAULT_CONFIG.get(key));
         }
     }
 

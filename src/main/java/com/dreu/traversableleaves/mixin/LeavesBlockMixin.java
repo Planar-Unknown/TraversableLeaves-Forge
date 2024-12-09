@@ -47,16 +47,14 @@ public abstract class LeavesBlockMixin extends Block {
         if (!isTraversable()) return;
         if (entity instanceof Player player){
             if (!level.getBlockState(new BlockPos(player.position())).is(BlockTags.LEAVES)){
-                entity.resetFallDistance();
-                entity.setDeltaMovement(entity.getDeltaMovement().multiply(0, 1, 0));
+                entity.setDeltaMovement(entity.getDeltaMovement().multiply(MOVEMENT_PENALTY * 0.454545F, 1, MOVEMENT_PENALTY * 0.454545F));
             } else {
-                player.makeStuckInBlock(blockState, new Vec3(0.6, 1.0, 0.6));
+                player.makeStuckInBlock(blockState, new Vec3(MOVEMENT_PENALTY, 1.0, MOVEMENT_PENALTY));
             }
             createAmbience(player, blockPos);
         } else if (entity instanceof LivingEntity) {
             createAmbience(entity, blockPos);
-            entity.resetFallDistance();
-            entity.setDeltaMovement(entity.getDeltaMovement().subtract(0, entity.getDeltaMovement().y + 1, 0));
+            entity.makeStuckInBlock(blockState, new Vec3(MOVEMENT_PENALTY, 1.0, MOVEMENT_PENALTY));
         }
     }
 
