@@ -14,6 +14,7 @@ import static com.dreu.traversableleaves.TraversableLeaves.MODID;
 
 @SuppressWarnings({"SameParameterValue", "unchecked"})
 public class TLConfig {
+    public static boolean configNeedsRepair = false;
     static final String fileName = "config/" + MODID + "/general.toml";
     static final String defaultConfig = """
            #Movement Speed penalty while traversing leaves, 0 = no penalty (Range : 0 - 100)
@@ -75,11 +76,13 @@ public class TLConfig {
         try {
             if ((CONFIG.get(key) == null)) {
                 LOGGER.error("Key [{}] is missing from Config: {}", key, fileName);
+                configNeedsRepair = true;
                 return clas.cast(DEFAULT_CONFIG.get(key));
             }
             return CONFIG.get(key);
         } catch (Exception e) {
             LOGGER.error("Value for [{}] is an invalid type in Config: {}", key, fileName);
+            configNeedsRepair = true;
             return clas.cast(DEFAULT_CONFIG.get(key));
         }
     }
