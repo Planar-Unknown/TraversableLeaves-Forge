@@ -16,14 +16,14 @@ import static com.dreu.traversableleaves.TraversableLeaves.MODID;
 public class TLConfig {
     static final String fileName = "config/" + MODID + "/general.toml";
     static final String defaultConfig = """
-           #Movement Speed penalty while traversing leaves, 0 = no penalty (Range : 0 - 100) (Default: 27)
-           SpeedPenalty = 27
+           #Movement Speed penalty while traversing leaves, 0 = no penalty (Range : 0 - 100)
+           SpeedPenalty = 27 #Default: 27
            
            #Whether Armor value reduces movement penalty
-           ArmorBonus = true
+           ArmorBonus = true #Defualt: true
            
            #List of leaves (false = Blacklist)
-           LeavesWhitelist = true
+           LeavesWhitelist = true #Default: true
            Traversable=[
             "minecraft:jungle_leaves",
             "minecraft:oak_leaves",
@@ -37,13 +37,12 @@ public class TLConfig {
            ]
            
            #List of Entities that can/cannot traverse leaves (false = Blacklist)
-           EntityWhitelist = false
+           EntityWhitelist = false #Default: false
            Entities=[
             "minecraft:sheep",
             "minecraft:pig",
             "minecraft:cow",
             "minecraft:chicken",
-            "minecraft:horse",
             "minecraft:donkey",
             "minecraft:llama",
             "minecraft:trader_llama",
@@ -59,7 +58,8 @@ public class TLConfig {
 
     public static final Set<ResourceLocation> LEAVES = new HashSet<>();
     public static final Set<ResourceLocation> ENTITIES = new HashSet<>();
-    public static final float MOVEMENT_PENALTY = getOrDefault("SpeedPenalty", Integer.class) * 0.021978f;
+    public static final float MOVEMENT_PENALTY = getOrDefault("SpeedPenalty", Integer.class) * 0.02f;
+    public static final float ARMOR_SCALE_FACTOR = (2 - MOVEMENT_PENALTY) * 0.05f;
     public static final boolean ARMOR_HELPS = getOrDefault("ArmorBonus", Boolean.class);
     public static final boolean IS_LEAVES_WHITELIST = getOrDefault("LeavesWhitelist", Boolean.class);
     public static final boolean IS_ENTITIES_WHITELIST = getOrDefault("EntityWhitelist", Boolean.class);
@@ -94,4 +94,6 @@ public class TLConfig {
                     writer.close();
                     return true;}));
     }
+
+    public static void repairConfig() {/*TODO*/}
 }

@@ -5,6 +5,7 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -47,15 +48,19 @@ public abstract class LeavesBlockMixin extends Block {
         if (!isTraversable()) return;
         if (entity instanceof Player player){
             if (!level.getBlockState(new BlockPos(player.position())).is(BlockTags.LEAVES)){
-                entity.setDeltaMovement(entity.getDeltaMovement().multiply(MOVEMENT_PENALTY * 0.454545F, 1, MOVEMENT_PENALTY * 0.454545F));
+                entity.setDeltaMovement(entity.getDeltaMovement().multiply((MOVEMENT_PENALTY + getArmorBonus(player)) * 0.5f, 1, (MOVEMENT_PENALTY + getArmorBonus(player)) * 0.5f));
             } else {
-                player.makeStuckInBlock(blockState, new Vec3(MOVEMENT_PENALTY, 1.0, MOVEMENT_PENALTY));
+                player.makeStuckInBlock(blockState, new Vec3(MOVEMENT_PENALTY + getArmorBonus(player), 1.0, MOVEMENT_PENALTY + getArmorBonus(player)));
             }
             createAmbience(player, blockPos);
         } else if (entity instanceof LivingEntity) {
             createAmbience(entity, blockPos);
             entity.makeStuckInBlock(blockState, new Vec3(MOVEMENT_PENALTY, 1.0, MOVEMENT_PENALTY));
         }
+    }
+
+    private float getArmorBonus(Player player) {
+        return ARMOR_HELPS ? ARMOR_SCALE_FACTOR * Mth.clamp(player.getArmorValue(), 0, 20) : 0;
     }
 
     private void createAmbience(Entity entity, BlockPos blockPos){
