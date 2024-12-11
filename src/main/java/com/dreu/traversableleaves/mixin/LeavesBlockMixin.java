@@ -39,7 +39,7 @@ public abstract class LeavesBlockMixin extends Block {
     @ParametersAreNonnullByDefault
     public @NotNull VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext context) {
         if (context instanceof EntityCollisionContext entityContext && entityContext.getEntity() != null) {
-            return isTraversable() && IS_ENTITIES_WHITELIST == ENTITIES.contains(ForgeRegistries.ENTITY_TYPES.getKey(entityContext.getEntity().getType())) && !(context.isAbove(Shapes.block(), blockPos, true) && !context.isDescending()) ? Shapes.empty() : Shapes.block();
+            return this.isTraversable() && IS_ENTITIES_WHITELIST == ENTITIES.contains(ForgeRegistries.ENTITY_TYPES.getKey(entityContext.getEntity().getType())) && !(context.isAbove(Shapes.block(), blockPos, true) && !context.isDescending()) ? Shapes.empty() : Shapes.block();
         }
         return Shapes.block();
     }
@@ -47,7 +47,7 @@ public abstract class LeavesBlockMixin extends Block {
     public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
         if (!isTraversable()) return;
         if (entity instanceof Player player){
-            if (!level.getBlockState(new BlockPos(player.position())).is(BlockTags.LEAVES)){
+            if (!level.getBlockState(new BlockPos(player.blockPosition())).is(BlockTags.LEAVES)){
                 entity.setDeltaMovement(entity.getDeltaMovement().multiply((MOVEMENT_PENALTY + getArmorBonus(player)) * 0.5f, 1, (MOVEMENT_PENALTY + getArmorBonus(player)) * 0.5f));
             } else {
                 player.makeStuckInBlock(blockState, new Vec3(MOVEMENT_PENALTY + getArmorBonus(player), 1.0, MOVEMENT_PENALTY + getArmorBonus(player)));
@@ -65,14 +65,14 @@ public abstract class LeavesBlockMixin extends Block {
 
     private void createAmbience(Entity entity, BlockPos blockPos){
         if (!entity.position().equals(new Vec3(entity.xOld, entity.yOld, entity.zOld))) {
-            if (entity.level.getGameTime() % 15 == 1) {
+            if (entity.level().getGameTime() % 15 == 1) {
                 entity.playSound(SoundEvents.GRASS_BREAK, 0.1f, 0.6f);
             }
-            if (entity.level.getGameTime() % 4 == 1){
-                double d0 = (double) blockPos.getX() + entity.level.random.nextDouble();
+            if (entity.level().getGameTime() % 4 == 1){
+                double d0 = (double) blockPos.getX() + entity.level().random.nextDouble();
                 double d1 = (double) blockPos.getY() + 1;
-                double d2 = (double) blockPos.getZ() + entity.level.random.nextDouble();
-                entity.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, this.defaultBlockState()), d0, d1, d2, 0, 0, 0);
+                double d2 = (double) blockPos.getZ() + entity.level().random.nextDouble();
+                entity.level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, this.defaultBlockState()), d0, d1, d2, 0, 0, 0);
             }
         }
     }
