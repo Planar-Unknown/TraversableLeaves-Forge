@@ -39,7 +39,7 @@ public abstract class LeavesBlockMixin extends Block {
     @ParametersAreNonnullByDefault
     public @NotNull VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext context) {
         if (context instanceof EntityCollisionContext entityContext && entityContext.getEntity() != null) {
-            return IS_ENTITIES_WHITELIST == ENTITIES.contains(ForgeRegistries.ENTITY_TYPES.getKey(entityContext.getEntity().getType())) && !(context.isAbove(Shapes.block(), blockPos, true) && !context.isDescending()) ? Shapes.empty() : Shapes.block();
+            return isTraversable() && IS_ENTITIES_WHITELIST == ENTITIES.contains(ForgeRegistries.ENTITY_TYPES.getKey(entityContext.getEntity().getType())) && !(context.isAbove(Shapes.block(), blockPos, true) && !context.isDescending()) ? Shapes.empty() : Shapes.block();
         }
         return Shapes.block();
     }
