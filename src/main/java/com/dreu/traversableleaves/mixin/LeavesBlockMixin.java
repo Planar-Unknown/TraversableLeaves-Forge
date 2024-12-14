@@ -21,29 +21,24 @@ import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
-
-import javax.annotation.ParametersAreNonnullByDefault;
 
 import static com.dreu.traversableleaves.config.TLConfig.*;
 import static net.minecraft.world.level.block.LeavesBlock.*;
 
-@Mixin(LeavesBlock.class) @SuppressWarnings({"deprecation", "unused"})
+@Mixin(LeavesBlock.class) @SuppressWarnings({"deprecation", "unused", "NullableProblems"})
 public abstract class LeavesBlockMixin extends Block {
     public LeavesBlockMixin(Properties properties) {
         super(properties);
-        this.registerDefaultState(this.stateDefinition.any().setValue(DISTANCE, 7).setValue(PERSISTENT, false).setValue(WATERLOGGED, false));
+        this.registerDefaultState(this.stateDefinition.any().setValue(DISTANCE, 7).setValue(PERSISTENT, false));
     }
 
-    @ParametersAreNonnullByDefault
-    public @NotNull VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext context) {
+    public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext context) {
         if (context instanceof EntityCollisionContext entityContext && entityContext.getEntity() != null) {
-            return isTraversable() && IS_ENTITIES_WHITELIST == ENTITIES.contains(ForgeRegistries.ENTITY_TYPES.getKey(entityContext.getEntity().getType())) && !(context.isAbove(Shapes.block(), blockPos, true) && !context.isDescending()) ? Shapes.empty() : Shapes.block();
+            return isTraversable() && IS_ENTITIES_WHITELIST == ENTITIES.contains(ForgeRegistries.ENTITIES.getKey(entityContext.getEntity().getType())) && !(context.isAbove(Shapes.block(), blockPos, true) && !context.isDescending()) ? Shapes.empty() : Shapes.block();
         }
         return Shapes.block();
     }
-    @ParametersAreNonnullByDefault
     public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
         if (!isTraversable()) return;
         if (entity instanceof Player player){
