@@ -1,70 +1,72 @@
 package com.dreu.traversableleaves.mixin;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.LeavesBlock;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particles.BlockParticleData;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.EntityCollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.shapes.EntitySelectionContext;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorldReader;
+import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import static com.dreu.traversableleaves.config.TLConfig.*;
-import static net.minecraft.world.level.block.LeavesBlock.*;
+import static net.minecraft.block.LeavesBlock.DISTANCE;
+import static net.minecraft.block.LeavesBlock.PERSISTENT;
 
-@Mixin(LeavesBlock.class) @SuppressWarnings({"deprecation", "unused"})
+@Mixin(LeavesBlock.class) @SuppressWarnings({"deprecation", "unused", "NullableProblems"})
 public abstract class LeavesBlockMixin extends Block {
     public LeavesBlockMixin(Properties properties) {
         super(properties);
-        this.registerDefaultState(this.stateDefinition.any().setValue(DISTANCE, 7).setValue(PERSISTENT, false).setValue(WATERLOGGED, false));
+        this.registerDefaultState(this.stateDefinition.any().setValue(DISTANCE, 7).setValue(PERSISTENT, false));
     }
 
-    @ParametersAreNonnullByDefault
-    public @NotNull VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext context) {
-        if (context instanceof EntityCollisionContext entityContext && entityContext.getEntity() != null) {
-            return isTraversable() && IS_ENTITIES_WHITELIST == ENTITIES.contains(ForgeRegistries.ENTITY_TYPES.getKey(entityContext.getEntity().getType())) && !(context.isAbove(Shapes.block(), blockPos, true) && !context.isDescending()) ? Shapes.empty() : Shapes.block();
+    @Override
+    public VoxelShape getCollisionShape(BlockState blockState, IBlockReader blockReader, BlockPos blockPos, ISelectionContext context) {
+        if (context instanceof EntitySelectionContext && context.getEntity() != null) {
+            return isTraversable() && IS_ENTITIES_WHITELIST == ENTITIES.contains(ForgeRegistries.ENTITIES.getKey(context.getEntity().getType())) && !(context.isAbove(VoxelShapes.block(), blockPos, true) && !context.isDescending()) ? VoxelShapes.empty() : VoxelShapes.block();
         }
-        return Shapes.block();
+        return VoxelShapes.block();
     }
+    
     @ParametersAreNonnullByDefault
-    public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
+    public void entityInside(BlockState blockState, World level, BlockPos blockPos, Entity entity) {
         if (!isTraversable()) return;
-        if (entity instanceof Player player){
+        if (entity instanceof PlayerEntity){
+            PlayerEntity player = ((PlayerEntity) entity);
             if (!level.getBlockState(new BlockPos(player.position())).is(BlockTags.LEAVES)){
                 entity.setDeltaMovement(entity.getDeltaMovement().multiply((MOVEMENT_PENALTY + getArmorBonus(player)) * 0.5f, 1, (MOVEMENT_PENALTY + getArmorBonus(player)) * 0.5f));
             } else {
-                player.makeStuckInBlock(blockState, new Vec3(MOVEMENT_PENALTY + getArmorBonus(player), 1.0, MOVEMENT_PENALTY + getArmorBonus(player)));
+                player.makeStuckInBlock(blockState, new Vector3d(MOVEMENT_PENALTY + getArmorBonus(player), 1.0, MOVEMENT_PENALTY + getArmorBonus(player)));
             }
             createAmbience(player, blockPos);
         } else if (entity instanceof LivingEntity) {
             createAmbience(entity, blockPos);
-            entity.makeStuckInBlock(blockState, new Vec3(MOVEMENT_PENALTY, 1.0, MOVEMENT_PENALTY));
+            entity.makeStuckInBlock(blockState, new Vector3d(MOVEMENT_PENALTY, 1.0, MOVEMENT_PENALTY));
         }
     }
 
-    private float getArmorBonus(Player player) {
-        return ARMOR_HELPS ? ARMOR_SCALE_FACTOR * Mth.clamp(player.getArmorValue(), 0, 20) : 0;
+    private float getArmorBonus(PlayerEntity player) {
+        return ARMOR_HELPS ? ARMOR_SCALE_FACTOR * MathHelper.clamp(player.getArmorValue(), 0, 20) : 0;
     }
 
     private void createAmbience(Entity entity, BlockPos blockPos){
-        if (!entity.position().equals(new Vec3(entity.xOld, entity.yOld, entity.zOld))) {
+        if (!entity.position().equals(new Vector3d(entity.xOld, entity.yOld, entity.zOld))) {
             if (entity.level.getGameTime() % 15 == 1) {
                 entity.playSound(SoundEvents.GRASS_BREAK, 0.1f, 0.6f);
             }
@@ -72,14 +74,15 @@ public abstract class LeavesBlockMixin extends Block {
                 double d0 = (double) blockPos.getX() + entity.level.random.nextDouble();
                 double d1 = (double) blockPos.getY() + 1;
                 double d2 = (double) blockPos.getZ() + entity.level.random.nextDouble();
-                entity.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, this.defaultBlockState()), d0, d1, d2, 0, 0, 0);
+                entity.level.addParticle(new BlockParticleData(ParticleTypes.BLOCK, this.defaultBlockState()), d0, d1, d2, 0, 0, 0);
             }
         }
     }
 
-    public boolean isLadder(BlockState state, LevelReader level, BlockPos pos, LivingEntity entity) {
-        return isTraversable() && entity instanceof Player player && !player.isCrouching();
+    public boolean isLadder(BlockState state, IWorldReader worldReader, BlockPos pos, LivingEntity entity) {
+        return isTraversable() && entity instanceof PlayerEntity && !entity.isCrouching();
     }
+
     public boolean isTraversable(){
         return IS_LEAVES_WHITELIST == LEAVES.contains(ForgeRegistries.BLOCKS.getKey(this));
     }

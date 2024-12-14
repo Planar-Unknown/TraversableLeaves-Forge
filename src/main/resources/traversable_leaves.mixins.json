@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "com.dreu.traversableleaves.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "traversable_leaves.refmap.json",
+  "mixins": [
+    "LeavesBlockMixin"
+  ],
+  "client": [],
+  "minVersion": "0.8"
+}

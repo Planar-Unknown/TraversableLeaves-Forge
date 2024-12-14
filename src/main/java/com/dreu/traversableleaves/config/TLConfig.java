@@ -2,7 +2,7 @@ package com.dreu.traversableleaves.config;
 
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.toml.TomlParser;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ResourceLocation;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -11,7 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static com.dreu.traversableleaves.TraversableLeaves.LOGGER;
 import static com.dreu.traversableleaves.TraversableLeaves.MODID;
@@ -20,45 +22,44 @@ import static com.dreu.traversableleaves.TraversableLeaves.MODID;
 public class TLConfig {
     public static boolean configNeedsRepair = false;
     static final String fileName = "config/" + MODID + "/general.toml";
-    static final String defaultConfig = """
-           #To reset this config to default, delete this file and rerun the game.
-           #Movement Speed penalty while traversing leaves, 0 = no penalty (Range : 0 - 100)
-           SpeedPenalty = 27 #Default: 27
-           
-           #Whether Armor value reduces movement penalty
-           ArmorBonus = true #Defualt: true
-           
-           #List of leaves (false = Blacklist)
-           LeavesWhitelist = true #Default: true
-           Traversable=[
-            "minecraft:jungle_leaves",
-            "minecraft:oak_leaves",
-            "minecraft:spruce_leaves",
-            "minecraft:dark_oak_leaves",
-            "minecraft:acacia_leaves",
-            "minecraft:birch_leaves",
-            "minecraft:azalea_leaves",
-            "minecraft:flowering_azalea_leaves",
-            "minecraft:mangrove_leaves"
-           ]
-           
-           #List of Entities that can/cannot traverse leaves (false = Blacklist)
-           EntityWhitelist = false #Default: false
-           Entities=[
-            "minecraft:sheep",
-            "minecraft:pig",
-            "minecraft:cow",
-            "minecraft:chicken",
-            "minecraft:donkey",
-            "minecraft:llama",
-            "minecraft:trader_llama",
-            "minecraft:mule",
-            "minecraft:frog",
-            "minecraft:goat",
-            "minecraft:mooshroom",
-            "minecraft:turtle"
-           ]
-           """;
+    static final String defaultConfig =
+            "#To reset this config to default, delete this file and rerun the game.\n" +
+            "#Movement Speed penalty while traversing leaves, 0 = no penalty (Range : 0 - 100)\n" +
+            "SpeedPenalty = 27 #Default: 27\n" +
+            "\n" +
+            "#Whether Armor value reduces movement penalty\n" +
+            "ArmorBonus = true #Defualt: true\n" +
+            "\n" +
+            "#List of leaves (false = Blacklist)\n" +
+            "LeavesWhitelist = true #Default: true\n" +
+            "Traversable=[\n" +
+            " \"minecraft:jungle_leaves\",\n" +
+            " \"minecraft:oak_leaves\",\n" +
+            " \"minecraft:spruce_leaves\",\n" +
+            " \"minecraft:dark_oak_leaves\",\n" +
+            " \"minecraft:acacia_leaves\",\n" +
+            " \"minecraft:birch_leaves\",\n" +
+            " \"minecraft:azalea_leaves\",\n" +
+            " \"minecraft:flowering_azalea_leaves\",\n" +
+            " \"minecraft:mangrove_leaves\"\n" +
+            "]\n" +
+            "\n" +
+            "#List of Entities that can/cannot traverse leaves (false = Blacklist)\n" +
+            "EntityWhitelist = false #Default: false\n" +
+            "Entities=[\n" +
+            " \"minecraft:sheep\",\n" +
+            " \"minecraft:pig\",\n" +
+            " \"minecraft:cow\",\n" +
+            " \"minecraft:chicken\",\n" +
+            " \"minecraft:donkey\",\n" +
+            " \"minecraft:llama\",\n" +
+            " \"minecraft:trader_llama\",\n" +
+            " \"minecraft:mule\",\n" +
+            " \"minecraft:frog\",\n" +
+            " \"minecraft:goat\",\n" +
+            " \"minecraft:mooshroom\",\n" +
+            " \"minecraft:turtle\"\n" +
+            "]";
     private static final Config CONFIG = parseFileOrDefault();
     private static final Config DEFAULT_CONFIG = new TomlParser().parse(defaultConfig);
 
@@ -95,8 +96,8 @@ public class TLConfig {
 
     static Config parseFileOrDefault() {
         try {
-            Files.createDirectories(Path.of("config/" + MODID));} catch (Exception ignored) {}
-        return new TomlParser().parse(Path.of(fileName).toAbsolutePath(),
+            Files.createDirectories(new File("config/" + MODID).toPath());} catch (Exception ignored) {}
+        return new TomlParser().parse(new File(fileName),
                 ((path, configFormat) -> {
                     FileWriter writer = new FileWriter(path.toFile().getAbsolutePath());
                     writer.write(defaultConfig);
@@ -132,11 +133,9 @@ public class TLConfig {
             for (ResourceLocation rL : LEAVES) {
                 contents.append("   \"").append(rL.toString()).append("\",\n");
             }
-            contents.append("""
-                    ]
-                    
-                    #List of Entities that can/cannot traverse leaves (false = Blacklist)
-                    EntityWhitelist =\s""")
+            contents.append("]\n\n" +
+                            "#List of Entities that can/cannot traverse leaves (false = Blacklist)\n" +
+                            "EntityWhitelist =")
                     .append(IS_ENTITIES_WHITELIST)
                     .append(" #Default: false\n")
                     .append("Entities=[\n");
