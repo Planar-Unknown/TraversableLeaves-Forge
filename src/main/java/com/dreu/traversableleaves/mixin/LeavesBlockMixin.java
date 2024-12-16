@@ -29,7 +29,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import static com.dreu.traversableleaves.config.TLConfig.*;
 import static net.minecraft.world.level.block.LeavesBlock.*;
 
-@Mixin(LeavesBlock.class) @SuppressWarnings({"deprecation", "unused"})
+@Mixin(LeavesBlock.class) @SuppressWarnings({"deprecation", "unused", "resource"})
 public abstract class LeavesBlockMixin extends Block {
     public LeavesBlockMixin(Properties properties) {
         super(properties);
@@ -38,9 +38,8 @@ public abstract class LeavesBlockMixin extends Block {
 
     @ParametersAreNonnullByDefault
     public @NotNull VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext context) {
-        if (context instanceof EntityCollisionContext entityContext && entityContext.getEntity() != null) {
+        if (context instanceof EntityCollisionContext entityContext && entityContext.getEntity() != null)
             return this.isTraversable() && IS_ENTITIES_WHITELIST == ENTITIES.contains(ForgeRegistries.ENTITY_TYPES.getKey(entityContext.getEntity().getType())) && !(context.isAbove(Shapes.block(), blockPos, true) && !context.isDescending()) ? Shapes.empty() : Shapes.block();
-        }
         return Shapes.block();
     }
     @ParametersAreNonnullByDefault
