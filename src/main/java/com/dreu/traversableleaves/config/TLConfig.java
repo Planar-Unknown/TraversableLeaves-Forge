@@ -3,6 +3,7 @@ package com.dreu.traversableleaves.config;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.toml.TomlParser;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -29,17 +30,9 @@ public class TLConfig {
            ArmorBonus = true #Defualt: true
            
            #List of leaves (false = Blacklist)
-           LeavesWhitelist = true #Default: true
+           LeavesWhitelist = false #Default: true
            Traversable=[
-            "minecraft:jungle_leaves",
-            "minecraft:oak_leaves",
-            "minecraft:spruce_leaves",
-            "minecraft:dark_oak_leaves",
-            "minecraft:acacia_leaves",
-            "minecraft:birch_leaves",
-            "minecraft:azalea_leaves",
-            "minecraft:flowering_azalea_leaves",
-            "minecraft:mangrove_leaves"
+           
            ]
            
            #List of Entities that can/cannot traverse leaves (false = Blacklist)
@@ -64,7 +57,7 @@ public class TLConfig {
 
     public static final Set<ResourceLocation> LEAVES = new HashSet<>();
     public static final Set<ResourceLocation> ENTITIES = new HashSet<>();
-    private static final int CACHED_SPEED_PENALTY = getOrDefault("SpeedPenalty", Integer.class);
+    private static final int CACHED_SPEED_PENALTY = Mth.clamp(getOrDefault("SpeedPenalty",Integer.class), 0, 100);
     public static final float MOVEMENT_PENALTY = CACHED_SPEED_PENALTY * 0.02f;
     public static final float ARMOR_SCALE_FACTOR = (2 - MOVEMENT_PENALTY) * 0.05f;
     public static final boolean ARMOR_HELPS = getOrDefault("ArmorBonus", Boolean.class);
