@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "traversable_leaves.refmap.json",
   "mixins": [
-    "LeavesBlockMixin"
+    "LeavesBlockMixin",
+    "DynamicLeavesBlockMixin"
   ],
   "client": [],
   "minVersion": "0.8"
