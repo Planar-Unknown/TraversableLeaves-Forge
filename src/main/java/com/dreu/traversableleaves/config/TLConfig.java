@@ -29,17 +29,8 @@ public class TLConfig {
            ArmorBonus = true #Defualt: true
            
            #List of leaves (false = Blacklist)
-           LeavesWhitelist = true #Default: true
+           LeavesWhitelist = false #Default: true
            Traversable=[
-            "minecraft:jungle_leaves",
-            "minecraft:oak_leaves",
-            "minecraft:spruce_leaves",
-            "minecraft:dark_oak_leaves",
-            "minecraft:acacia_leaves",
-            "minecraft:birch_leaves",
-            "minecraft:azalea_leaves",
-            "minecraft:flowering_azalea_leaves",
-            "minecraft:mangrove_leaves"
            ]
            
            #List of Entities that can/cannot traverse leaves (false = Blacklist)

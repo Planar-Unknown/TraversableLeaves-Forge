@@ -21,7 +21,7 @@ mixin {
     config 'traversable_leaves.mixins.json'
 }
 
-version = '1.2.2-1.18.2'
+version = '1.3.0-1.18.2'
 group = 'com.dreu.traversable_leaves'
 archivesBaseName = 'traversable_leaves'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -86,11 +86,16 @@ minecraft {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-repositories {}
+repositories {
+    maven {
+        url = "https://cursemaven.com"
+    }
+}
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.18.2-40.2.0'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    implementation fg.deobf("curse.maven:dynamictrees-252818:4674900")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
