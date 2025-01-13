@@ -89,7 +89,9 @@ public class TLConfig {
 
     static Config parseFileOrDefault() {
         try {
-            Files.createDirectories(Path.of("config/" + MODID));} catch (Exception ignored) {}
+            Files.createDirectories(Path.of("config/" + MODID));} catch (Exception e) {
+            LOGGER.warn("Failed to create Config Directories for " + Path.of("config/" + MODID));
+        }
         return new TomlParser().parse(Path.of(fileName).toAbsolutePath(),
                 ((path, configFormat) -> {
                     FileWriter writer = new FileWriter(path.toFile().getAbsolutePath());
