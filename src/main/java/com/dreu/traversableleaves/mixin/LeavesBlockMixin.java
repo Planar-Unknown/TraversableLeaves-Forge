@@ -8,7 +8,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particles.BlockParticleData;
 import net.minecraft.particles.ParticleTypes;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -47,22 +46,15 @@ public abstract class LeavesBlockMixin extends Block {
     @ParametersAreNonnullByDefault
     public void entityInside(BlockState blockState, World level, BlockPos blockPos, Entity entity) {
         if (!isTraversable()) return;
-        if (entity instanceof PlayerEntity){
-            PlayerEntity player = ((PlayerEntity) entity);
-            if (!level.getBlockState(new BlockPos(player.position())).is(BlockTags.LEAVES)){
-                entity.setDeltaMovement(entity.getDeltaMovement().multiply((MOVEMENT_PENALTY + getArmorBonus(player)) * 0.5f, 1, (MOVEMENT_PENALTY + getArmorBonus(player)) * 0.5f));
-            } else {
-                player.makeStuckInBlock(blockState, new Vector3d(MOVEMENT_PENALTY + getArmorBonus(player), 1.0, MOVEMENT_PENALTY + getArmorBonus(player)));
-            }
-            createAmbience(player, blockPos);
-        } else if (entity instanceof LivingEntity) {
+        if (entity instanceof LivingEntity) {
             createAmbience(entity, blockPos);
-            entity.makeStuckInBlock(blockState, new Vector3d(MOVEMENT_PENALTY, 1.0, MOVEMENT_PENALTY));
+            entity.fallDistance = 0;
+            entity.setDeltaMovement(entity.getDeltaMovement().multiply((MOVEMENT_PENALTY + getArmorBonus((LivingEntity) entity)) * 0.5f, entity.isCrouching() ? 0.5 : 1, (MOVEMENT_PENALTY + getArmorBonus((LivingEntity) entity)) * 0.5f));
         }
     }
 
-    private float getArmorBonus(PlayerEntity player) {
-        return ARMOR_HELPS ? ARMOR_SCALE_FACTOR * MathHelper.clamp(player.getArmorValue(), 0, 20) : 0;
+    private float getArmorBonus(LivingEntity livingEntity) {
+        return ARMOR_HELPS ? ARMOR_SCALE_FACTOR * MathHelper.clamp(livingEntity.getArmorValue(), 0, 20) : 0;
     }
 
     private void createAmbience(Entity entity, BlockPos blockPos){
@@ -79,8 +71,8 @@ public abstract class LeavesBlockMixin extends Block {
         }
     }
 
-    public boolean isLadder(BlockState state, IWorldReader worldReader, BlockPos pos, LivingEntity entity) {
-        return isTraversable() && entity instanceof PlayerEntity && !entity.isCrouching();
+    public boolean isLadder(BlockState state, IWorldReader worldReader, BlockPos pos, LivingEntity livingEntity) {
+        return isTraversable() && livingEntity instanceof PlayerEntity && !livingEntity.isCrouching() && livingEntity.jumping;
     }
 
     public boolean isTraversable(){
