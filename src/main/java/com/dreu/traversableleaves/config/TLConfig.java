@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +31,9 @@ public class TLConfig {
            
            #Whether Armor value reduces movement penalty
            ArmorBonus = true #Defualt: true
+           
+           #Whether leaves behave like ladders
+           CanClimb = true #Default: true
            
            #List of leaves (false = Blacklist)
            LeavesWhitelist = false #Default: false
@@ -62,6 +67,7 @@ public class TLConfig {
     public static final float MOVEMENT_PENALTY = CACHED_SPEED_PENALTY * 0.02f;
     public static final float ARMOR_SCALE_FACTOR = (2 - MOVEMENT_PENALTY) * 0.05f;
     public static final boolean ARMOR_HELPS = getOrDefault("ArmorBonus", Boolean.class);
+    public static final boolean CAN_CLIMB = getOrDefault("CanClimb", Boolean.class);
     public static final boolean IS_LEAVES_WHITELIST = getOrDefault("LeavesWhitelist", Boolean.class);
     public static final boolean IS_ENTITIES_WHITELIST = getOrDefault("EntityWhitelist", Boolean.class);
     static {
@@ -101,11 +107,12 @@ public class TLConfig {
     }
 
     public static void repairConfig() {
-        LOGGER.info("An issue was found with config: {} | You can find a copy of faulty config at: {} | Repairing...", fileName, fileName.replace(".toml", "_faulty.toml"));
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+        Path faulty_path = Paths.get(fileName.replace(".toml", "_faulty_" + timestamp + ".toml"));
+        LOGGER.info("An issue was found with config: {} | You can find a copy of faulty config at: {} | Repairing...", fileName, faulty_path.getFileName());
         Path sourcePath = Paths.get(fileName);
-        Path destinationPath = Paths.get(fileName.replace(".toml", "_faulty.toml"));
         try {
-            Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(sourcePath, faulty_path, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             LOGGER.warn("Exception during faulty config caching: {}", e.getMessage());
         }
@@ -119,6 +126,11 @@ public class TLConfig {
                     .append("ArmorBonus = ")
                     .append(ARMOR_HELPS)
                     .append(" #Defualt: true\n")
+                    .append("\n")
+                    .append("#Whether leaves behave like ladders\n")
+                    .append("CanClimb = ")
+                    .append(CAN_CLIMB)
+                    .append(" #Default: true\n")
                     .append("\n")
                     .append("#List of leaves (false = Blacklist)\n")
                     .append("LeavesWhitelist = ")

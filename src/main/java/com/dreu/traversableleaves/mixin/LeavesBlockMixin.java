@@ -39,7 +39,10 @@ public abstract class LeavesBlockMixin extends Block {
     @Override
     public @NotNull VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext context) {
         if (context instanceof EntityCollisionContext entityContext && entityContext.getEntity() != null)
-            return this.isTraversable() && IS_ENTITIES_WHITELIST == ENTITIES.contains(ForgeRegistries.ENTITY_TYPES.getKey(entityContext.getEntity().getType())) && !(context.isAbove(Shapes.block(), blockPos, true) && !context.isDescending()) ? Shapes.empty() : Shapes.block();
+            return !CAN_CLIMB || (this.isTraversable() && IS_ENTITIES_WHITELIST == ENTITIES.contains(ForgeRegistries.ENTITY_TYPES.getKey(entityContext.getEntity().getType()))
+                    && !(context.isAbove(Shapes.block(), blockPos, true)
+                    && !context.isDescending()))
+                    ? Shapes.empty() : Shapes.block();
         return Shapes.block();
     }
 
@@ -50,7 +53,8 @@ public abstract class LeavesBlockMixin extends Block {
         if (entity instanceof LivingEntity livingEntity) {
             createAmbience(entity, blockPos);
             livingEntity.resetFallDistance();
-            entity.setDeltaMovement(entity.getDeltaMovement().multiply((MOVEMENT_PENALTY + getArmorBonus(livingEntity)) * 0.5f, livingEntity.isCrouching() ? 0.5 : 1, (MOVEMENT_PENALTY + getArmorBonus(livingEntity)) * 0.5f));
+
+            entity.setDeltaMovement(entity.getDeltaMovement().multiply((MOVEMENT_PENALTY + getArmorBonus(livingEntity)) * 0.5f, livingEntity.isCrouching() || !CAN_CLIMB ? 0.5f : 1f, (MOVEMENT_PENALTY + getArmorBonus(livingEntity)) * 0.5f));
         }
     }
 
@@ -74,10 +78,10 @@ public abstract class LeavesBlockMixin extends Block {
 
     @Override
     public boolean isLadder(BlockState state, LevelReader level, BlockPos pos, LivingEntity entity) {
-        return isTraversable() && entity instanceof Player player && !player.isCrouching() && player.jumping;
+        return CAN_CLIMB && isTraversable() && entity instanceof Player player && !player.isCrouching() && player.jumping;
     }
 
-    public boolean isTraversable(){
+    public boolean isTraversable() {
         return IS_LEAVES_WHITELIST == LEAVES.contains(ForgeRegistries.BLOCKS.getKey(this));
     }
 }
