@@ -46,21 +46,15 @@ public abstract class LeavesBlockMixin extends Block {
     @ParametersAreNonnullByDefault
     public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
         if (!isTraversable()) return;
-        if (entity instanceof Player player){
-            if (!level.getBlockState(new BlockPos(player.blockPosition())).is(BlockTags.LEAVES)){
-                entity.setDeltaMovement(entity.getDeltaMovement().multiply((MOVEMENT_PENALTY + getArmorBonus(player)) * 0.5f, 1, (MOVEMENT_PENALTY + getArmorBonus(player)) * 0.5f));
-            } else {
-                player.makeStuckInBlock(blockState, new Vec3(MOVEMENT_PENALTY + getArmorBonus(player), 1.0, MOVEMENT_PENALTY + getArmorBonus(player)));
-            }
-            createAmbience(player, blockPos);
-        } else if (entity instanceof LivingEntity) {
+        if (entity instanceof LivingEntity livingEntity) {
             createAmbience(entity, blockPos);
-            entity.makeStuckInBlock(blockState, new Vec3(MOVEMENT_PENALTY, 1.0, MOVEMENT_PENALTY));
+            livingEntity.resetFallDistance();
+            entity.setDeltaMovement(entity.getDeltaMovement().multiply((MOVEMENT_PENALTY + getArmorBonus(livingEntity)) * 0.5f, livingEntity.isCrouching() ? 0.5 : 1, (MOVEMENT_PENALTY + getArmorBonus(livingEntity)) * 0.5f));
         }
     }
 
-    private float getArmorBonus(Player player) {
-        return ARMOR_HELPS ? ARMOR_SCALE_FACTOR * Mth.clamp(player.getArmorValue(), 0, 20) : 0;
+    private float getArmorBonus(LivingEntity livingEntity) {
+        return ARMOR_HELPS ? ARMOR_SCALE_FACTOR * Mth.clamp(livingEntity.getArmorValue(), 0, 20) : 0;
     }
 
     private void createAmbience(Entity entity, BlockPos blockPos){
@@ -78,7 +72,7 @@ public abstract class LeavesBlockMixin extends Block {
     }
 
     public boolean isLadder(BlockState state, LevelReader level, BlockPos pos, LivingEntity entity) {
-        return isTraversable() && entity instanceof Player player && !player.isCrouching();
+        return isTraversable() && entity instanceof Player player && !player.isCrouching() && player.jumping;
     }
     public boolean isTraversable(){
         return IS_LEAVES_WHITELIST == LEAVES.contains(ForgeRegistries.BLOCKS.getKey(this));
