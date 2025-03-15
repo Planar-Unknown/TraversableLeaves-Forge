@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +31,9 @@ public class TLConfig {
             "\n" +
             "#Whether Armor value reduces movement penalty\n" +
             "ArmorBonus = true #Defualt: true\n" +
+            "\n" +
+            "#Whether leaves behave like ladders\n" +
+            "CanClimb = true #Default: true\n" +
             "\n" +
             "#List of leaves (false = Blacklist)\n" +
             "LeavesWhitelist = false #Default: true\n" +
@@ -58,6 +63,7 @@ public class TLConfig {
     private static final int CACHED_SPEED_PENALTY = getOrDefault("SpeedPenalty", Integer.class);
     public static final float MOVEMENT_PENALTY = CACHED_SPEED_PENALTY * 0.02f;
     public static final float ARMOR_SCALE_FACTOR = (2 - MOVEMENT_PENALTY) * 0.05f;
+    public static final boolean CAN_CLIMB = getOrDefault("CanClimb", Boolean.class);
     public static final boolean ARMOR_HELPS = getOrDefault("ArmorBonus", Boolean.class);
     public static final boolean IS_LEAVES_WHITELIST = getOrDefault("LeavesWhitelist", Boolean.class);
     public static final boolean IS_ENTITIES_WHITELIST = getOrDefault("EntityWhitelist", Boolean.class);
@@ -86,7 +92,10 @@ public class TLConfig {
 
     static Config parseFileOrDefault() {
         try {
-            Files.createDirectories(new File("config/" + MODID).toPath());} catch (Exception ignored) {}
+            Files.createDirectories(new File("config/" + MODID).toPath());
+        } catch (Exception e) {
+            LOGGER.warn("Failed to create Config Directories for " + new File("config/" + MODID).toPath());
+        }
         return new TomlParser().parse(new File(fileName),
                 ((path, configFormat) -> {
                     FileWriter writer = new FileWriter(path.toFile().getAbsolutePath());
@@ -96,11 +105,12 @@ public class TLConfig {
     }
 
     public static void repairConfig() {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+        Path faulty_path = Paths.get(fileName.replace(".toml", "_faulty_" + timestamp + ".toml"));
         LOGGER.info("An issue was found with config: {} | You can find a copy of faulty config at: {} | Repairing...", fileName, fileName.replace(".toml", "_faulty.toml"));
         Path sourcePath = Paths.get(fileName);
-        Path destinationPath = Paths.get(fileName.replace(".toml", "_faulty.toml"));
         try {
-            Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(sourcePath, faulty_path, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             LOGGER.warn("Exception during faulty config caching: {}", e.getMessage());
         }

@@ -38,18 +38,21 @@ public abstract class LeavesBlockMixin extends Block {
     @Override
     public VoxelShape getCollisionShape(BlockState blockState, IBlockReader blockReader, BlockPos blockPos, ISelectionContext context) {
         if (context instanceof EntitySelectionContext && context.getEntity() != null) {
-            return isTraversable() && IS_ENTITIES_WHITELIST == ENTITIES.contains(ForgeRegistries.ENTITIES.getKey(context.getEntity().getType())) && !(context.isAbove(VoxelShapes.block(), blockPos, true) && !context.isDescending()) ? VoxelShapes.empty() : VoxelShapes.block();
+            return !CAN_CLIMB || (isTraversable() && IS_ENTITIES_WHITELIST == ENTITIES.contains(ForgeRegistries.ENTITIES.getKey(context.getEntity().getType()))
+                    && !(context.isAbove(VoxelShapes.block(), blockPos, true)
+                    && !context.isDescending()))
+                    ? VoxelShapes.empty() : VoxelShapes.block();
         }
         return VoxelShapes.block();
     }
-    
+
     @ParametersAreNonnullByDefault
     public void entityInside(BlockState blockState, World level, BlockPos blockPos, Entity entity) {
         if (!isTraversable()) return;
         if (entity instanceof LivingEntity) {
             createAmbience(entity, blockPos);
             entity.fallDistance = 0;
-            entity.setDeltaMovement(entity.getDeltaMovement().multiply((MOVEMENT_PENALTY + getArmorBonus((LivingEntity) entity)) * 0.5f, entity.isCrouching() ? 0.5 : 1, (MOVEMENT_PENALTY + getArmorBonus((LivingEntity) entity)) * 0.5f));
+            entity.setDeltaMovement(entity.getDeltaMovement().multiply((MOVEMENT_PENALTY + getArmorBonus((LivingEntity) entity)) * 0.5f, entity.isCrouching() || !CAN_CLIMB ? 0.5 : 1, (MOVEMENT_PENALTY + getArmorBonus((LivingEntity) entity)) * 0.5f));
         }
     }
 
@@ -72,7 +75,7 @@ public abstract class LeavesBlockMixin extends Block {
     }
 
     public boolean isLadder(BlockState state, IWorldReader worldReader, BlockPos pos, LivingEntity livingEntity) {
-        return isTraversable() && livingEntity instanceof PlayerEntity && !livingEntity.isCrouching() && livingEntity.jumping;
+        return CAN_CLIMB && isTraversable() && livingEntity instanceof PlayerEntity && !livingEntity.isCrouching() && livingEntity.jumping;
     }
 
     public boolean isTraversable(){

@@ -39,9 +39,9 @@ public abstract class DynamicLeavesBlockMixin extends LeavesBlock {
     @Overwrite
     public VoxelShape getCollisionShape(BlockState blockState, IBlockReader worldReader, BlockPos blockPos, ISelectionContext context) {
         if (context instanceof EntitySelectionContext && context.getEntity() != null)
-            return this.isTraversable() && IS_ENTITIES_WHITELIST == ENTITIES.contains(ForgeRegistries.ENTITIES.getKey(context.getEntity().getType()))
+            return !CAN_CLIMB || (this.isTraversable() && IS_ENTITIES_WHITELIST == ENTITIES.contains(ForgeRegistries.ENTITIES.getKey(context.getEntity().getType()))
                     && !(context.isAbove(VoxelShapes.block(), blockPos, true)
-                    && !context.isDescending())
+                    && !context.isDescending()))
                     ? VoxelShapes.empty() : VoxelShapes.block();
         return VoxelShapes.block();
     }
@@ -52,7 +52,7 @@ public abstract class DynamicLeavesBlockMixin extends LeavesBlock {
         if (entity instanceof LivingEntity) {
             createAmbience(entity, blockPos);
             entity.fallDistance = 0;
-            entity.setDeltaMovement(entity.getDeltaMovement().multiply((MOVEMENT_PENALTY + getArmorBonus((LivingEntity) entity)) * 0.5f, entity.isCrouching() ? 0.5 : 1, (MOVEMENT_PENALTY + getArmorBonus((LivingEntity) entity)) * 0.5f));
+            entity.setDeltaMovement(entity.getDeltaMovement().multiply((MOVEMENT_PENALTY + getArmorBonus((LivingEntity) entity)) * 0.5f, entity.isCrouching() || !CAN_CLIMB ? 0.5 : 1, (MOVEMENT_PENALTY + getArmorBonus((LivingEntity) entity)) * 0.5f));
         }
     }
 
