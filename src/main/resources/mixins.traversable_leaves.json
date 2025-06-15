@@ -5,10 +5,15 @@
   "minVersion": "0.8",
   "refmap": "traversable_leaves.refmap.json",
   "mixins": [
-    "LeavesBlockMixin"
     "BlockCollisionMixin",
+    "BlockMixin",
     "BlockStateBaseMixin",
     "EntityMixin",
+    "EvokerMixin",
+    "ForgeHooksMixin",
+    "MoveControlMixin",
+    "WalkNodeEvaluatorMixin",
+    "PistonMovingBlockEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
