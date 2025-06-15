@@ -1,9 +1,9 @@
 package com.dreu.traversableleaves;
 
+import com.dreu.traversableleaves.network.PacketHandler;
 import com.mojang.logging.LogUtils;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -18,14 +18,16 @@ import static com.dreu.traversableleaves.config.TLConfig.repairConfig;
 
 @Mod(TraversableLeaves.MODID)
 public class TraversableLeaves {
+    public static boolean configHasBeenParsed = false;
     public static final String MODID = "traversable_leaves";
     public static final Logger LOGGER = LogUtils.getLogger();
-    public TraversableLeaves(){
+    public TraversableLeaves() {
         if(configNeedsRepair)repairConfig();
         IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        DeferredRegister<Block> RARA = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
-        RARA.register("dev_leaves", () -> new LeavesBlock(BlockBehaviour.Properties.copy(Blocks.OAK_LEAVES)));
-        RARA.register(eventBus);
+        DeferredRegister<Block> ROAR = DeferredRegister.create(ForgeRegistries.BLOCKS, "zz");
+        ROAR.register("zz", () -> new Block(BlockBehaviour.Properties.copy(Blocks.STONE)));
+        ROAR.register(eventBus);
+        PacketHandler.register();
         MinecraftForge.EVENT_BUS.register(eventBus);
     }
 }
