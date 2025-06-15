@@ -6,6 +6,9 @@
   "refmap": "traversable_leaves.refmap.json",
   "mixins": [
     "LeavesBlockMixin"
+    "BlockCollisionMixin",
+    "BlockStateBaseMixin",
+    "EntityMixin",
   ],
   "injectors": {
     "defaultRequire": 1
