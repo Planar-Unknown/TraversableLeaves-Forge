@@ -109,6 +109,19 @@ public class TLConfig {
 
   public static void parse() {
     CONFIG = parseConfigOrDefault();
+    if (CONFIG.get("LeavesWhitelist") != null) {
+      cacheAndOverwriteOldConfig();
+      CONFIG = new TomlParser().parse(DEFAULT_CONFIG_STRING);
+    }
+  }
+
+  private static void cacheAndOverwriteOldConfig() {
+    try (FileWriter writer = new FileWriter(fileName)) {
+      Files.copy(Path.of(fileName), Path.of(fileName.replace(".toml", "_old.toml")));
+      writer.write(DEFAULT_CONFIG_STRING);
+    } catch (Exception e) {
+      LOGGER.error(e.getMessage());
+    }
   }
 
   public static void populate() {
