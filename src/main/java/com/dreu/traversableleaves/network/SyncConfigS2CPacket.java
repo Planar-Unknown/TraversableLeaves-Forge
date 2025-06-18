@@ -43,6 +43,7 @@ public class SyncConfigS2CPacket {
     buf.writeFloat(MOVEMENT_MULTIPLIER);
     buf.writeFloat(ARMOR_SCALE_FACTOR);
     buf.writeBoolean(IS_ENTITIES_WHITELIST);
+    buf.writeBoolean(CAN_CLIMB);
 
     buf.writeInt(TL_BLOCKS.size());
     for (ResourceLocation block : TL_BLOCKS) {
