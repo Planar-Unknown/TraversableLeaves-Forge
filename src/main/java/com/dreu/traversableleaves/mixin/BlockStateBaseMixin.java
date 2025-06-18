@@ -1,6 +1,6 @@
 package com.dreu.traversableleaves.mixin;
 
-import com.dreu.traversableleaves.ITraversable;
+import com.dreu.traversableleaves.interfaces.ITraversableBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -15,15 +15,13 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static com.dreu.traversableleaves.config.TLConfig.IS_ENTITIES_WHITELIST;
-import static com.dreu.traversableleaves.config.TLConfig.TL_ENTITIES;
+import static com.dreu.traversableleaves.interfaces.ITraversableEntity.canTraverse;
 
 @SuppressWarnings({"DataFlowIssue", "unused", "deprecation"})
 @Mixin(BlockBehaviour.BlockStateBase.class)
@@ -31,7 +29,7 @@ public abstract class BlockStateBaseMixin {
 
   @Inject(method = "isSuffocating", at = @At("HEAD"), cancellable = true)
   private void onIsSuffocating(BlockGetter level, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-    if (getBlock() instanceof ITraversable block && block.isTraversable())
+    if (getBlock() instanceof ITraversableBlock block && block.isTraversable())
       cir.setReturnValue(false);
   }
 
@@ -43,7 +41,7 @@ public abstract class BlockStateBaseMixin {
 
   @Inject(method = "isPathfindable", at = @At("HEAD"), cancellable = true)
   public void onIsPathfindable(BlockGetter level, BlockPos blockPos, PathComputationType pathType, CallbackInfoReturnable<Boolean> cir) {
-    if (this.getBlock() instanceof ITraversable iTraversable && iTraversable.isTraversable())
+    if (this.getBlock() instanceof ITraversableBlock iTraversable && iTraversable.isTraversable())
       cir.setReturnValue(true);
   }
 
@@ -53,24 +51,23 @@ public abstract class BlockStateBaseMixin {
       cancellable = true
   )
   private void onGetCollisionShapeWithContext(BlockGetter level, BlockPos blockPos, CollisionContext context, CallbackInfoReturnable<VoxelShape> cir) {
-    if (getBlock() instanceof ITraversable block && block.isTraversable()) {
+    if (getBlock() instanceof ITraversableBlock block && block.isTraversable()) {
       if (context instanceof EntityCollisionContext entityContext && entityContext.getEntity() != null) {
         if (entityContext.getEntity() instanceof LivingEntity livingEntity) {
           if (livingEntity instanceof Player player && player.isCreative() && player.getAbilities().flying)
             cir.setReturnValue(Shapes.empty());
           if (context.isAbove(getBlock().getCollisionShape(asState(), level, blockPos, context), blockPos, false) && !context.isDescending())
             cir.setReturnValue(getBlock().getCollisionShape(asState(), level, blockPos, context));
-          if (IS_ENTITIES_WHITELIST == TL_ENTITIES.contains(ForgeRegistries.ENTITY_TYPES.getKey(livingEntity.getType()))) {
+          if (canTraverse(livingEntity)) {
             cir.setReturnValue(Shapes.empty());
           }
         } else if (!(entityContext.getEntity() instanceof ItemEntity)) {
-          System.out.println(ForgeRegistries.ENTITY_TYPES.getKey(entityContext.getEntity().getType()));
           cir.setReturnValue(Shapes.empty());
-
         }
       }
     }
   }
+
 
   @Shadow
   protected abstract BlockState asState();

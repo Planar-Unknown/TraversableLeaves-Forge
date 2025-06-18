@@ -1,6 +1,6 @@
 package com.dreu.traversableleaves.mixin;
 
-import com.dreu.traversableleaves.ITraversable;
+import com.dreu.traversableleaves.interfaces.ITraversableBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,14 +26,14 @@ public class WalkNodeEvaluatorMixin {
       )
   )
   private static VoxelShape redirectCollisionShape(BlockState blockState, BlockGetter level, BlockPos blockPos) {
-    if (blockState.getBlock() instanceof ITraversable iTraversable && iTraversable.isTraversable())
+    if (blockState.getBlock() instanceof ITraversableBlock iTraversable && iTraversable.isTraversable())
       return Shapes.empty();
     return blockState.getCollisionShape(level, blockPos);
   }
 
   @Inject(method = "getBlockPathTypeStatic", at = @At("HEAD"), cancellable = true)
   private static void injectGetBlockPathTypeStatic(BlockGetter level, BlockPos.MutableBlockPos blockPos, CallbackInfoReturnable<BlockPathTypes> cir) {
-    if (level.getBlockState(blockPos).getBlock() instanceof ITraversable iTraversable && iTraversable.isTraversable())
+    if (level.getBlockState(blockPos).getBlock() instanceof ITraversableBlock iTraversable && iTraversable.isTraversable())
       cir.setReturnValue(BlockPathTypes.WALKABLE);
   }
 }

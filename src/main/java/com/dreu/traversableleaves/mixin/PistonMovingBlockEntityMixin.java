@@ -1,6 +1,6 @@
 package com.dreu.traversableleaves.mixin;
 
-import com.dreu.traversableleaves.ITraversable;
+import com.dreu.traversableleaves.interfaces.ITraversableBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.piston.PistonMovingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,7 +19,7 @@ public class PistonMovingBlockEntityMixin {
       cancellable = true
   )
   private void modifyCollisionState(CallbackInfoReturnable<BlockState> cir) {
-    if (cir.getReturnValue().getBlock() instanceof ITraversable iTraversable && iTraversable.isTraversable())
+    if (cir.getReturnValue().getBlock() instanceof ITraversableBlock iTraversable && iTraversable.isTraversable())
       cir.setReturnValue(Blocks.AIR.defaultBlockState());
   }
 }

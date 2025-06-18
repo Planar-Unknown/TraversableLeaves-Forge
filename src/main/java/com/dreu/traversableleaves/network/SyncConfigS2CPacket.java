@@ -9,7 +9,7 @@ import net.minecraftforge.network.NetworkEvent;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
-import static com.dreu.traversableleaves.TraversableLeaves.configHasBeenParsed;
+import static com.dreu.traversableleaves.TraversableLeaves.configHasBeenPopulated;
 import static com.dreu.traversableleaves.config.TLConfig.*;
 
 public class SyncConfigS2CPacket {
@@ -17,10 +17,10 @@ public class SyncConfigS2CPacket {
 
 
   public SyncConfigS2CPacket(FriendlyByteBuf buf) {
-    MOVEMENT_PENALTY = buf.readFloat();
+    MOVEMENT_MULTIPLIER = buf.readFloat();
     ARMOR_SCALE_FACTOR = buf.readFloat();
-    ARMOR_HELPS = buf.readBoolean();
     IS_ENTITIES_WHITELIST = buf.readBoolean();
+    CAN_CLIMB = buf.readBoolean();
 
     int bounds = buf.readInt();
     for (int i = 0; i < bounds; i++)
@@ -32,17 +32,16 @@ public class SyncConfigS2CPacket {
   }
 
   public SyncConfigS2CPacket() {
-    if (!configHasBeenParsed) {
+    if (!configHasBeenPopulated) {
       parse();
       populate();
-      configHasBeenParsed = true;
+      configHasBeenPopulated = true;
     }
   }
 
   public void toBytes(FriendlyByteBuf buf) {
-    buf.writeFloat(MOVEMENT_PENALTY);
+    buf.writeFloat(MOVEMENT_MULTIPLIER);
     buf.writeFloat(ARMOR_SCALE_FACTOR);
-    buf.writeBoolean(ARMOR_HELPS);
     buf.writeBoolean(IS_ENTITIES_WHITELIST);
 
     buf.writeInt(TL_BLOCKS.size());
@@ -59,9 +58,6 @@ public class SyncConfigS2CPacket {
   }
 
   public void handle(Supplier<NetworkEvent.Context> context) {
-    for (ResourceLocation block : TL_BLOCKS) {
-      System.out.println(block.toString());
-    }
     context.get().enqueueWork(() -> ForgeEvents.lastServerWasLocal = Minecraft.getInstance().isLocalServer());
     context.get().setPacketHandled(true);
   }

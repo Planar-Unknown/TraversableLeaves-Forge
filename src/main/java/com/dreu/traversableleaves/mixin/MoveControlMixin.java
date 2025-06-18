@@ -1,6 +1,6 @@
 package com.dreu.traversableleaves.mixin;
 
-import com.dreu.traversableleaves.ITraversable;
+import com.dreu.traversableleaves.interfaces.ITraversableBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.level.BlockGetter;
@@ -13,8 +13,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @SuppressWarnings("unused")
 @Mixin(MoveControl.class)
-public class MoveControlMixin {
-
+public abstract class MoveControlMixin {
   @Redirect(
       method = "tick",
       at = @At(
@@ -23,7 +22,7 @@ public class MoveControlMixin {
       )
   )
   private VoxelShape redirectGetCollisionShape(BlockState blockState, BlockGetter level, BlockPos blockPos) {
-    if (blockState.getBlock() instanceof ITraversable iTraversable && iTraversable.isTraversable())
+    if (blockState.getBlock() instanceof ITraversableBlock iTraversable && iTraversable.isTraversable())
       return Shapes.empty();
     return blockState.getCollisionShape(level, blockPos);
   }

@@ -1,6 +1,6 @@
 package com.dreu.traversableleaves.mixin;
 
-import com.dreu.traversableleaves.ITraversable;
+import com.dreu.traversableleaves.interfaces.ITraversableBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
@@ -21,7 +21,7 @@ public class EvokerMixin {
       )
   )
   private VoxelShape redirectGetCollisionShape(BlockState blockState, BlockGetter level, BlockPos blockPos) {
-    if (blockState.getBlock() instanceof ITraversable iTraversable && iTraversable.isTraversable())
+    if (blockState.getBlock() instanceof ITraversableBlock iTraversable && iTraversable.isTraversable())
       return Shapes.empty();
     return blockState.getCollisionShape(level, blockPos);
   }
