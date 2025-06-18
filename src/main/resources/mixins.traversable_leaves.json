@@ -11,6 +11,7 @@
     "EntityMixin",
     "EvokerMixin",
     "ForgeHooksMixin",
+    "LivingEntityMixin",
     "MoveControlMixin",
     "WalkNodeEvaluatorMixin",
     "PistonMovingBlockEntityMixin"
