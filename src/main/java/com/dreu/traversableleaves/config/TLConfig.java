@@ -153,22 +153,22 @@ public class TLConfig {
         if (configKey.charAt(1) == '#') {
           if (isValidBlockTag(configKey.substring(2))) {
             BLOCKS_CACHE.add(configKey);
-            for (Block block : ForgeRegistries.BLOCKS.tags().getTag(BlockTags.create(new ResourceLocation(configKey.substring(2)))))
+            for (Block block : ForgeRegistries.BLOCKS.tags().getTag(BlockTags.create(ResourceLocation.parse(configKey.substring(2)))))
               toRemove.add(ForgeRegistries.BLOCKS.getKey(block));
           }
         } else if (isValidBlock(configKey.substring(1))) {
           BLOCKS_CACHE.add(configKey);
-          toRemove.add(new ResourceLocation(configKey.substring(1)));
+          toRemove.add(ResourceLocation.parse(configKey.substring(1)));
         }
       } else if (configKey.startsWith("#")) {
         if (isValidBlockTag(configKey.substring(1))) {
           BLOCKS_CACHE.add(configKey);
-          for (Block block : ForgeRegistries.BLOCKS.tags().getTag(BlockTags.create(new ResourceLocation(configKey.substring(1)))))
+          for (Block block : ForgeRegistries.BLOCKS.tags().getTag(BlockTags.create(ResourceLocation.parse(configKey.substring(1)))))
             TL_BLOCKS.add(ForgeRegistries.BLOCKS.getKey(block));
         }
       } else if (isValidBlock(configKey)) {
         BLOCKS_CACHE.add(configKey);
-        TL_BLOCKS.add(new ResourceLocation(configKey));
+        TL_BLOCKS.add(ResourceLocation.parse(configKey));
       }
     });
     TL_BLOCKS.removeAll(toRemove);
@@ -179,22 +179,22 @@ public class TLConfig {
         if (configKey.charAt(1) == '#') {
           if (isValidEntityTag(configKey.substring(2))) {
             ENTITIES_CACHE.add(configKey);
-            for (EntityType<?> entityType : ForgeRegistries.ENTITY_TYPES.tags().getTag(TagKey.create(ForgeRegistries.ENTITY_TYPES.getRegistryKey(), new ResourceLocation(configKey.substring(2)))))
+            for (EntityType<?> entityType : ForgeRegistries.ENTITY_TYPES.tags().getTag(TagKey.create(ForgeRegistries.ENTITY_TYPES.getRegistryKey(), ResourceLocation.parse(configKey.substring(2)))))
               toRemove.add(ForgeRegistries.ENTITY_TYPES.getKey(entityType));
           }
         } else if (isValidEntity(configKey.substring(1))) {
           ENTITIES_CACHE.add(configKey);
-          toRemove.add(new ResourceLocation(configKey.substring(1)));
+          toRemove.add(ResourceLocation.parse(configKey.substring(1)));
         }
       }
       if (configKey.startsWith("#"))
         if (isValidEntityTag(configKey.substring(1))) {
           ENTITIES_CACHE.add(configKey);
-          for (EntityType<?> entityType : ForgeRegistries.ENTITY_TYPES.tags().getTag(TagKey.create(ForgeRegistries.ENTITY_TYPES.getRegistryKey(), new ResourceLocation(configKey.substring(1)))))
+          for (EntityType<?> entityType : ForgeRegistries.ENTITY_TYPES.tags().getTag(TagKey.create(ForgeRegistries.ENTITY_TYPES.getRegistryKey(), ResourceLocation.parse(configKey.substring(1)))))
             TL_ENTITIES.add(ForgeRegistries.ENTITY_TYPES.getKey(entityType));
         } else if (isValidEntity(configKey)) {
           ENTITIES_CACHE.add(configKey);
-          TL_ENTITIES.add(new ResourceLocation(configKey));
+          TL_ENTITIES.add(ResourceLocation.parse(configKey));
         }
     });
     TL_ENTITIES.removeAll(toRemove);
@@ -237,19 +237,28 @@ public class TLConfig {
   }
 
   private static boolean isValidEntityTag(String tagId) {
-    if (!ResourceLocation.isValidResourceLocation(tagId)) {
+    if (!isValidResourceLocation(tagId)) {
       LOGGER.warn("Not a valid Entity Tag ResourceLocation: <{}> declared in Config: [{}] | Skipping Tag...", tagId, fileName);
       return false;
     }
-    if (!ForgeRegistries.ENTITY_TYPES.tags().isKnownTagName(TagKey.create(ForgeRegistries.ENTITY_TYPES.getRegistryKey(), new ResourceLocation(tagId)))) {
+    if (!ForgeRegistries.ENTITY_TYPES.tags().isKnownTagName(TagKey.create(ForgeRegistries.ENTITY_TYPES.getRegistryKey(), ResourceLocation.parse(tagId)))) {
       LOGGER.warn("Not an existing Entity Tag: <{}> declared in Config: [{}] | Skipping Tag...", tagId, fileName);
       return false;
     }
     return true;
   }
 
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+  private static boolean isValidResourceLocation(String tagId) {
+    String[] parts = tagId.split(":");
+    if (parts.length != 2)
+      return false;
+    return ResourceLocation.isValidNamespace(parts[0])
+        && ResourceLocation.isValidPath(parts[1]);
+  }
+
   private static boolean isValidEntity(String entityId) {
-    if (!ResourceLocation.isValidResourceLocation(entityId)) {
+    if (!isValidResourceLocation(entityId)) {
       LOGGER.warn("Not a valid Entity ResourceLocation: <{}> declared in Config: [{}] | Skipping Block...", entityId, fileName);
       return false;
     }
@@ -257,7 +266,7 @@ public class TLConfig {
       LOGGER.warn("Config: [{}] declared Entity: <{}> but Mod: '{{}}' is not loaded | Skipping Block...", fileName, entityId, entityId.split(":")[0]);
       return false;
     }
-    if (!ForgeRegistries.ENTITY_TYPES.containsKey(new ResourceLocation(entityId))) {
+    if (!ForgeRegistries.ENTITY_TYPES.containsKey(ResourceLocation.parse(entityId))) {
       LOGGER.warn("Config: [{}] declared Entity: <{}> which does not exist, check for typos! | Skipping Block...", fileName, entityId);
       return false;
     }
@@ -265,11 +274,11 @@ public class TLConfig {
   }
 
   private static boolean isValidBlockTag(String tagId) {
-    if (!ResourceLocation.isValidResourceLocation(tagId)) {
+    if (!isValidResourceLocation(tagId)) {
       LOGGER.warn("Not a valid Block Tag ResourceLocation: <{}> declared in Config: [{}] | Skipping Tag...", tagId, fileName);
       return false;
     }
-    if (!ForgeRegistries.BLOCKS.tags().isKnownTagName(BlockTags.create(new ResourceLocation(tagId)))) {
+    if (!ForgeRegistries.BLOCKS.tags().isKnownTagName(BlockTags.create(ResourceLocation.parse(tagId)))) {
       LOGGER.warn("Not an existing Block Tag: <{}> declared in Config: [{}] | Skipping Tag...", tagId, fileName);
       return false;
     }
@@ -277,7 +286,7 @@ public class TLConfig {
   }
 
   private static boolean isValidBlock(String blockId) {
-    if (!ResourceLocation.isValidResourceLocation(blockId)) {
+    if (!isValidResourceLocation(blockId)) {
       LOGGER.warn("Not a valid Block ResourceLocation: <{}> declared in Config: [{}] | Skipping Block...", blockId, fileName);
       return false;
     }
@@ -285,7 +294,7 @@ public class TLConfig {
       LOGGER.warn("Config: [{}] declared Block: <{}> but Mod: '{{}}' is not loaded | Skipping Block...", fileName, blockId, blockId.split(":")[0]);
       return false;
     }
-    if (!ForgeRegistries.BLOCKS.containsKey(new ResourceLocation(blockId))) {
+    if (!ForgeRegistries.BLOCKS.containsKey(ResourceLocation.parse(blockId))) {
       LOGGER.warn("Config: [{}] declared Block: <{}> which does not exist, check for typos! | Skipping Block...", fileName, blockId);
       return false;
     }

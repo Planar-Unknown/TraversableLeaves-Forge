@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import static com.dreu.traversableleaves.config.TLConfig.CAN_CLIMB;
 import static com.dreu.traversableleaves.interfaces.ITraversableEntity.canTraverse;
 
-@SuppressWarnings({"unused", "deprecation"})
+@SuppressWarnings({"unused", "UnstableApiUsage"})
 @Mixin(ForgeHooks.class)
 public class ForgeHooksMixin {
 
@@ -30,9 +30,9 @@ public class ForgeHooksMixin {
       remap = false
   )
   private static boolean redirectIsLadder(BlockState blockState, LevelReader level, BlockPos blockPos, LivingEntity livingEntity) {
-    if (CAN_CLIMB && blockState.getBlock() instanceof ITraversableBlock traversable && traversable.isTraversable()) {
+    if (CAN_CLIMB && blockState.getBlock() instanceof ITraversableBlock iTraversableBlock && iTraversableBlock.isTraversable()) {
       if (livingEntity instanceof ITraversableEntity iTraversableEntity && iTraversableEntity.isTLJumping()) {
-        if (!(livingEntity.position().y >= blockState.getBlock().getCollisionShape(blockState, level, blockPos, CollisionContext.empty()).max(Direction.Axis.Y) + blockPos.getY())) {
+        if (!(livingEntity.position().y >= iTraversableBlock.accessGetCollisionShapeTL(blockState, level, blockPos, CollisionContext.empty()).max(Direction.Axis.Y) + blockPos.getY())) {
           if (livingEntity instanceof Player player) {
             return !player.isCrouching() || (player.isCreative() && player.getAbilities().flying);
           } else {

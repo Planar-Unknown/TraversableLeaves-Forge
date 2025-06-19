@@ -23,8 +23,7 @@ public class ForgeEvents {
     if (Minecraft.getInstance().isLocalServer() && !lastServerWasLocal)
       configHasBeenPopulated = false;
     if (event.getEntity() instanceof ServerPlayer serverPlayer) {
-      PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> serverPlayer), new SyncConfigS2CPacket());
-
+      PacketHandler.CHANNEL.send(new SyncConfigS2CPacket(), PacketDistributor.PLAYER.with(serverPlayer));
     }
   }
 }

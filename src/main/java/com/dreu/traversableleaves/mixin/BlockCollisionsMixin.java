@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import static com.dreu.traversableleaves.interfaces.ITraversableEntity.canTraverse;
 
-@SuppressWarnings({"unused", "deprecation"})
+@SuppressWarnings({"unused"})
 @Mixin(BlockCollisions.class)
 public abstract class BlockCollisionsMixin {
 
@@ -30,13 +30,13 @@ public abstract class BlockCollisionsMixin {
       )
   )
   private VoxelShape redirectGetCollisionShape(BlockState blockState, BlockGetter level, BlockPos blockPos, CollisionContext context) {
-    if (blockState.getBlock() instanceof ITraversableBlock iTraversable1 && iTraversable1.isTraversable()) {
+    if (blockState.getBlock() instanceof ITraversableBlock iTraversableBlock && iTraversableBlock.isTraversable()) {
       if (context instanceof EntityCollisionContext entityContext && entityContext.getEntity() != null) {
         if (entityContext.getEntity() instanceof LivingEntity livingEntity) {
           if (livingEntity instanceof Player player && player.isCreative() && player.getAbilities().flying)
             return Shapes.empty();
-          if (context.isAbove(blockState.getBlock().getCollisionShape(blockState, level, blockPos, context), blockPos, false) && !context.isDescending())
-            return blockState.getBlock().getCollisionShape(blockState, level, blockPos, CollisionContext.empty());
+          if (context.isAbove(iTraversableBlock.accessGetCollisionShapeTL(blockState, level, blockPos, context), blockPos, false) && !context.isDescending())
+            return iTraversableBlock.accessGetCollisionShapeTL(blockState, level, blockPos, CollisionContext.empty());
           if (canTraverse(livingEntity))
               return Shapes.empty();
         } else if (!(entityContext.getEntity() instanceof ItemEntity)) {

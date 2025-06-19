@@ -1,24 +1,25 @@
 package com.dreu.traversableleaves.network;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
-
-import java.util.Optional;
+import net.minecraftforge.network.Channel;
+import net.minecraftforge.network.ChannelBuilder;
+import net.minecraftforge.network.SimpleChannel;
 
 import static com.dreu.traversableleaves.TraversableLeaves.MODID;
 
 public class PacketHandler {
-  private static final String PROTOCOL_VERSION = "1";
-  public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-      new ResourceLocation(MODID, "main"),
-      () -> PROTOCOL_VERSION,
-      PROTOCOL_VERSION::equals,
-      PROTOCOL_VERSION::equals
-  );
+  public static final SimpleChannel CHANNEL =
+      ChannelBuilder.named(ResourceLocation.fromNamespaceAndPath(MODID, "main"))
+          .networkProtocolVersion(1)
+          .clientAcceptedVersions(Channel.VersionTest.exact(1))
+          .serverAcceptedVersions(Channel.VersionTest.exact(1))
+          .simpleChannel();
 
   public static void register() {
-    CHANNEL.registerMessage(0, SyncConfigS2CPacket.class, SyncConfigS2CPacket::toBytes, SyncConfigS2CPacket::new, SyncConfigS2CPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+    CHANNEL.messageBuilder(SyncConfigS2CPacket.class)
+        .decoder(SyncConfigS2CPacket::new)
+        .encoder(SyncConfigS2CPacket::toBytes)
+        .consumerMainThread(SyncConfigS2CPacket::handle)
+        .add();
   }
 }

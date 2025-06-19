@@ -6,7 +6,7 @@
   "refmap": "traversable_leaves.refmap.json",
   "mixins": [
     "BlockCollisionsMixin",
-    "BlockMixin",
+    "BlockBehaviourMixin",
     "BlockStateBaseMixin",
     "EntityMixin",
     "EvokerMixin",

@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import static com.dreu.traversableleaves.config.TLConfig.MOVEMENT_MULTIPLIER;
 
-@SuppressWarnings({"deprecation", "DataFlowIssue", "unused"})
+@SuppressWarnings({"DataFlowIssue", "unused"})
 @Mixin(Entity.class)
 public class EntityMixin {
 
@@ -62,11 +62,9 @@ public class EntityMixin {
   }
 
   private boolean shouldTraverse(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-    return blockState.getBlock() instanceof ITraversableBlock block && block.isTraversable()
+    return blockState.getBlock() instanceof ITraversableBlock iTraversableBlock && iTraversableBlock.isTraversable()
         && !(entity instanceof Player player && player.isCreative() && player.getAbilities().flying)
-        && !(entity.position().y >= blockState.getBlock()
-        .getCollisionShape(blockState, level, blockPos, CollisionContext.empty())
-        .max(Direction.Axis.Y) + blockPos.getY());
+        && !(entity.position().y >= iTraversableBlock.accessGetCollisionShapeTL(blockState, level, blockPos, CollisionContext.empty()).max(Direction.Axis.Y) + blockPos.getY());
   }
 
   private void createAmbience(Entity entity, BlockPos blockPos, BlockState blockState){

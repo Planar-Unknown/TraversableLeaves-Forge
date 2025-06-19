@@ -4,10 +4,9 @@ import com.dreu.traversableleaves.events.ForgeEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.event.network.CustomPayloadEvent;
 
 import java.nio.charset.StandardCharsets;
-import java.util.function.Supplier;
 
 import static com.dreu.traversableleaves.TraversableLeaves.configHasBeenPopulated;
 import static com.dreu.traversableleaves.config.TLConfig.*;
@@ -24,11 +23,11 @@ public class SyncConfigS2CPacket {
 
     int bounds = buf.readInt();
     for (int i = 0; i < bounds; i++)
-      TL_BLOCKS.add(new ResourceLocation(buf.readCharSequence(buf.readInt(), StandardCharsets.UTF_8).toString()));
+      TL_BLOCKS.add(ResourceLocation.parse(buf.readCharSequence(buf.readInt(), StandardCharsets.UTF_8).toString()));
 
     bounds = buf.readInt();
     for (int i = 0; i < bounds; i++)
-      TL_ENTITIES.add(new ResourceLocation(buf.readCharSequence(buf.readInt(), StandardCharsets.UTF_8).toString()));
+      TL_ENTITIES.add(ResourceLocation.parse(buf.readCharSequence(buf.readInt(), StandardCharsets.UTF_8).toString()));
   }
 
   public SyncConfigS2CPacket() {
@@ -58,8 +57,8 @@ public class SyncConfigS2CPacket {
     }
   }
 
-  public void handle(Supplier<NetworkEvent.Context> context) {
-    context.get().enqueueWork(() -> ForgeEvents.lastServerWasLocal = Minecraft.getInstance().isLocalServer());
-    context.get().setPacketHandled(true);
+  public void handle(CustomPayloadEvent.Context context) {
+    context.enqueueWork(() -> ForgeEvents.lastServerWasLocal = Minecraft.getInstance().isLocalServer());
+    context.setPacketHandled(true);
   }
 }
