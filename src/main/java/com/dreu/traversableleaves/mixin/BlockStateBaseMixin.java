@@ -33,12 +33,6 @@ public abstract class BlockStateBaseMixin {
       cir.setReturnValue(false);
   }
 
-  @Inject(method = "isViewBlocking", at = @At("HEAD"), cancellable = true)
-  public void onIsViewBlocking(BlockGetter blockGetter, BlockPos blockPos, CallbackInfoReturnable<Boolean> cir) {
-    if (Minecraft.getInstance().player.isCreative())
-      cir.setReturnValue(false);
-  }
-
   @Inject(method = "isPathfindable", at = @At("HEAD"), cancellable = true)
   public void onIsPathfindable(BlockGetter level, BlockPos blockPos, PathComputationType pathType, CallbackInfoReturnable<Boolean> cir) {
     if (this.getBlock() instanceof ITraversableBlock iTraversable && iTraversable.isTraversable())

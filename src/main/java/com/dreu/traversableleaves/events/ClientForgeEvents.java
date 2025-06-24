@@ -12,16 +12,20 @@ import net.minecraftforge.network.PacketDistributor;
 
 import static com.dreu.traversableleaves.TraversableLeaves.MODID;
 import static com.dreu.traversableleaves.TraversableLeaves.configHasBeenPopulated;
+import static com.dreu.traversableleaves.config.TLConfig.parse;
+import static com.dreu.traversableleaves.config.TLConfig.populate;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
 @SuppressWarnings("unused")
-@Mod.EventBusSubscriber(modid = MODID, bus = FORGE, value = Dist.DEDICATED_SERVER)
-public class ForgeEvents {
+@Mod.EventBusSubscriber(modid = MODID, bus = FORGE, value = Dist.CLIENT)
+public class ClientForgeEvents {
 
   @SubscribeEvent
   public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-    if (event.getEntity() instanceof ServerPlayer serverPlayer) {
-      PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> serverPlayer), new SyncConfigS2CPacket());
+    if (Minecraft.getInstance().isLocalServer() && !configHasBeenPopulated) {
+      parse();
+      populate();
+      configHasBeenPopulated = true;
     }
   }
 }

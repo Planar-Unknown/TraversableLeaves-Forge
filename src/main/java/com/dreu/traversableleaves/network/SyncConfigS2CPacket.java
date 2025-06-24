@@ -1,7 +1,5 @@
 package com.dreu.traversableleaves.network;
 
-import com.dreu.traversableleaves.events.ForgeEvents;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkEvent;
@@ -59,7 +57,7 @@ public class SyncConfigS2CPacket {
   }
 
   public void handle(Supplier<NetworkEvent.Context> context) {
-    context.get().enqueueWork(() -> ForgeEvents.lastServerWasLocal = Minecraft.getInstance().isLocalServer());
+    context.get().enqueueWork(() -> configHasBeenPopulated = false);
     context.get().setPacketHandled(true);
   }
 }
