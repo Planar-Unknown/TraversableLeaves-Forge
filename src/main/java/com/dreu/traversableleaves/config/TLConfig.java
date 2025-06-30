@@ -61,7 +61,7 @@ public class TLConfig {
     try {
       Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
     } catch (IOException e) {
-      LOGGER.warn("Exception during faulty config caching: {}", e.getMessage());
+      LOGGER.warn("Exception during caching of faulty Traversable Leaves config | Exception: {}", e.getMessage());
     }
     try (FileWriter writer = new FileWriter(new File(fileName).getAbsolutePath())) {
       StringBuilder contents = new StringBuilder()
@@ -73,6 +73,10 @@ public class TLConfig {
           .append("# Whether Armor value reduces movement penalty | Default: true\n")
           .append("ArmorHelps = ")
           .append(CACHED_ARMOR_HELPS)
+          .append("\n\n")
+          .append("# How much armor is required to completely negate the SpeedPenalty (Range: 0 - 255) | Default: 20\n")
+          .append("ArmorCap = ")
+          .append(CACHED_ARMOR_CAP)
           .append("\n\n")
           .append("# Whether leaves behave like ladders\n")
           .append("CanClimb = ")
@@ -113,8 +117,9 @@ public class TLConfig {
   public static boolean IS_ENTITIES_WHITELIST;
   private static int CACHED_SPEED_PENALTY;
   public static float MOVEMENT_MULTIPLIER;
-  public static float ARMOR_SCALE_FACTOR;
   public static boolean CACHED_ARMOR_HELPS;
+  private static int CACHED_ARMOR_CAP;
+  public static float ARMOR_SCALE_FACTOR;
   public static boolean CAN_CLIMB;
 
   public static void parse() {
@@ -143,31 +148,29 @@ public class TLConfig {
     CACHED_SPEED_PENALTY = getClampedSpeedPenalty();
     MOVEMENT_MULTIPLIER = (100 - CACHED_SPEED_PENALTY) * 0.01f;
     CACHED_ARMOR_HELPS = getOrDefault("ArmorHelps", Boolean.class);
-    ARMOR_SCALE_FACTOR = CACHED_ARMOR_HELPS ? (1 - MOVEMENT_MULTIPLIER) * (1.0f / getClampedArmorCap()) : 0;
+    CACHED_ARMOR_CAP = getClampedArmorCap();
+    ARMOR_SCALE_FACTOR = CACHED_ARMOR_HELPS ? (1 - MOVEMENT_MULTIPLIER) * (1.0f / CACHED_ARMOR_CAP) : 0;
     IS_ENTITIES_WHITELIST = getWhitelistBlacklist();
     CAN_CLIMB = getOrDefault("CanClimb", Boolean.class);
 
     Set<ResourceLocation> toRemove = new HashSet<>();
     ((List<String>) getOrDefault("Traversable", List.class)).forEach((configKey) -> {
+      BLOCKS_CACHE.add(configKey);
       if (configKey.startsWith("-")) {
         if (configKey.charAt(1) == '#') {
           if (isValidBlockTag(configKey.substring(2))) {
-            BLOCKS_CACHE.add(configKey);
             for (Block block : ForgeRegistries.BLOCKS.tags().getTag(BlockTags.create(new ResourceLocation(configKey.substring(2)))))
               toRemove.add(ForgeRegistries.BLOCKS.getKey(block));
           }
         } else if (isValidBlock(configKey.substring(1))) {
-          BLOCKS_CACHE.add(configKey);
           toRemove.add(new ResourceLocation(configKey.substring(1)));
         }
       } else if (configKey.startsWith("#")) {
         if (isValidBlockTag(configKey.substring(1))) {
-          BLOCKS_CACHE.add(configKey);
           for (Block block : ForgeRegistries.BLOCKS.tags().getTag(BlockTags.create(new ResourceLocation(configKey.substring(1)))))
             TL_BLOCKS.add(ForgeRegistries.BLOCKS.getKey(block));
         }
       } else if (isValidBlock(configKey)) {
-        BLOCKS_CACHE.add(configKey);
         TL_BLOCKS.add(new ResourceLocation(configKey));
       }
     });
@@ -175,27 +178,24 @@ public class TLConfig {
 
     toRemove.clear();
     ((List<String>) getOrDefault("Entities", List.class)).forEach((configKey) -> {
+      ENTITIES_CACHE.add(configKey);
       if (configKey.startsWith("-")) {
         if (configKey.charAt(1) == '#') {
           if (isValidEntityTag(configKey.substring(2))) {
-            ENTITIES_CACHE.add(configKey);
             for (EntityType<?> entityType : ForgeRegistries.ENTITY_TYPES.tags().getTag(TagKey.create(ForgeRegistries.ENTITY_TYPES.getRegistryKey(), new ResourceLocation(configKey.substring(2)))))
               toRemove.add(ForgeRegistries.ENTITY_TYPES.getKey(entityType));
           }
         } else if (isValidEntity(configKey.substring(1))) {
-          ENTITIES_CACHE.add(configKey);
           toRemove.add(new ResourceLocation(configKey.substring(1)));
         }
-      }
-      if (configKey.startsWith("#"))
+      } else if (configKey.startsWith("#")) {
         if (isValidEntityTag(configKey.substring(1))) {
-          ENTITIES_CACHE.add(configKey);
           for (EntityType<?> entityType : ForgeRegistries.ENTITY_TYPES.tags().getTag(TagKey.create(ForgeRegistries.ENTITY_TYPES.getRegistryKey(), new ResourceLocation(configKey.substring(1)))))
             TL_ENTITIES.add(ForgeRegistries.ENTITY_TYPES.getKey(entityType));
-        } else if (isValidEntity(configKey)) {
-          ENTITIES_CACHE.add(configKey);
-          TL_ENTITIES.add(new ResourceLocation(configKey));
         }
+      } else if (isValidEntity(configKey)) {
+        TL_ENTITIES.add(new ResourceLocation(configKey));
+      }
     });
     TL_ENTITIES.removeAll(toRemove);
 
