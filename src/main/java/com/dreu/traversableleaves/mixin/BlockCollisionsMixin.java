@@ -37,8 +37,8 @@ public abstract class BlockCollisionsMixin {
             return Shapes.empty();
           if (context.isAbove(blockState.getBlock().getCollisionShape(blockState, level, blockPos, context), blockPos, false) && !context.isDescending())
             return blockState.getBlock().getCollisionShape(blockState, level, blockPos, CollisionContext.empty());
-          if (canTraverse(livingEntity))
-              return Shapes.empty();
+          else if (canTraverse(livingEntity))
+            return Shapes.empty();
         } else if (!(entityContext.getEntity() instanceof ItemEntity)) {
           return Shapes.empty();
         }

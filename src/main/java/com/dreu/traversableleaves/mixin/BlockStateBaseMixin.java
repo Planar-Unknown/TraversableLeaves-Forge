@@ -1,7 +1,6 @@
 package com.dreu.traversableleaves.mixin;
 
 import com.dreu.traversableleaves.interfaces.ITraversableBlock;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -52,7 +51,7 @@ public abstract class BlockStateBaseMixin {
             cir.setReturnValue(Shapes.empty());
           if (context.isAbove(getBlock().getCollisionShape(asState(), level, blockPos, context), blockPos, false) && !context.isDescending())
             cir.setReturnValue(getBlock().getCollisionShape(asState(), level, blockPos, context));
-          if (canTraverse(livingEntity)) {
+          else if (canTraverse(livingEntity)) {
             cir.setReturnValue(Shapes.empty());
           }
         } else if (!(entityContext.getEntity() instanceof ItemEntity)) {
