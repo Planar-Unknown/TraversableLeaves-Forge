@@ -33,8 +33,8 @@ public class ForgeHooksMixin {
     if (CAN_CLIMB && blockState.getBlock() instanceof ITraversableBlock traversable && traversable.isTraversable()) {
       if (livingEntity instanceof ITraversableEntity iTraversableEntity) {
         if (livingEntity instanceof Player player) {
-         if (iTraversableEntity.isTLJumping() && shouldCollide(blockState, level, blockPos, livingEntity))
-          return !player.isCrouching() || (player.isCreative() && player.getAbilities().flying);
+          if (iTraversableEntity.isTLJumping() && shouldCollide(blockState, level, blockPos, livingEntity))
+            return !player.isCrouching() || (player.isCreative() && player.getAbilities().flying);
         } else if (shouldCollide(blockState, level, blockPos, livingEntity)){
           return canTraverse(livingEntity);
         }

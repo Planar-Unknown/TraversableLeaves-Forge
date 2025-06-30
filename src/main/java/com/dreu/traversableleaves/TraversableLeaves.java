@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 
 @Mod(TraversableLeaves.MODID)
 public class TraversableLeaves {
-    //Todo: remove ROAR for fabric and forge versions that already correctly handle not loading mis-versioned mods
     public static boolean configHasBeenPopulated = false;
     public static final String MODID = "traversable_leaves";
     public static final Logger LOGGER = LogUtils.getLogger();
