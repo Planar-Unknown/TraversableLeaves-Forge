@@ -23,19 +23,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static com.dreu.traversableleaves.interfaces.ITraversableEntity.canTraverse;
 
-@SuppressWarnings({"DataFlowIssue", "unused", "deprecation"})
+@SuppressWarnings({"unused", "deprecation"})
 @Mixin(BlockBehaviour.BlockStateBase.class)
 public abstract class BlockStateBaseMixin {
 
   @Inject(method = "isSuffocating", at = @At("HEAD"), cancellable = true)
   private void onIsSuffocating(BlockGetter level, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
     if (getBlock() instanceof ITraversableBlock block && block.isTraversable())
-      cir.setReturnValue(false);
-  }
-
-  @Inject(method = "isViewBlocking", at = @At("HEAD"), cancellable = true)
-  public void onIsViewBlocking(BlockGetter blockGetter, BlockPos blockPos, CallbackInfoReturnable<Boolean> cir) {
-    if (Minecraft.getInstance().player.isCreative())
       cir.setReturnValue(false);
   }
 
@@ -68,12 +62,9 @@ public abstract class BlockStateBaseMixin {
     }
   }
 
-
   @Shadow
   protected abstract BlockState asState();
 
   @Shadow
   public abstract Block getBlock();
-
-
 }
