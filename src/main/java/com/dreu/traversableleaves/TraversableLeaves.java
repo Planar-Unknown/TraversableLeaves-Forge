@@ -19,9 +19,9 @@ public class TraversableLeaves {
     public static boolean configHasBeenPopulated = false;
     public static final String MODID = "traversable_leaves";
     public static final Logger LOGGER = LogUtils.getLogger();
-    public TraversableLeaves() {
+    public TraversableLeaves(FMLJavaModLoadingContext context) {
         TLConfig.parse();
-        IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        IEventBus eventBus = context.getModEventBus();
         DeferredRegister<Block> ROAR = DeferredRegister.create(ForgeRegistries.BLOCKS, "zz");
         ROAR.register("zz", () -> new Block(BlockBehaviour.Properties.copy(Blocks.STONE)));
         ROAR.register(eventBus);
