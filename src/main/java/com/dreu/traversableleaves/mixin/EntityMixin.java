@@ -69,7 +69,7 @@ public class EntityMixin {
         .max(Direction.Axis.Y) + blockPos.getY());
   }
 
-  private void createAmbience(Entity entity, BlockPos blockPos, BlockState blockState){
+  private void createAmbience(Entity entity, BlockPos blockPos, BlockState blockState) {
     if (!entity.position().equals(new Vec3(entity.xOld, entity.yOld, entity.zOld))) {
       if (entity.level.getGameTime() % 15 == 1) {
         entity.playSound(blockState.getSoundType().getStepSound(), 0.1f, 0.6f);
