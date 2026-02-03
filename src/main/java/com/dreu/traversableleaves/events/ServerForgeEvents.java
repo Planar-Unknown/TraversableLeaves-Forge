@@ -10,7 +10,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.network.PacketDistributor;
 
-@EventBusSubscriber(modid = "traversable_leaves", bus = EventBusSubscriber.Bus.FORGE, value = {Dist.DEDICATED_SERVER})
+@EventBusSubscriber(modid = "traversable_leaves", bus = EventBusSubscriber.Bus.FORGE)
 public class ServerForgeEvents {
   @SubscribeEvent
   public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {

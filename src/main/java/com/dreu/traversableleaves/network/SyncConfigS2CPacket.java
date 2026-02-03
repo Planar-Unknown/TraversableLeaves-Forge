@@ -19,6 +19,7 @@ public class SyncConfigS2CPacket {
     ARMOR_SCALE_FACTOR = buf.readFloat();
     IS_ENTITIES_WHITELIST = buf.readBoolean();
     CAN_CLIMB = buf.readBoolean();
+    MOUNTED_ONLY = buf.readBoolean();
 
     int bounds = buf.readInt();
     for (int i = 0; i < bounds; i++)
@@ -42,6 +43,7 @@ public class SyncConfigS2CPacket {
     buf.writeFloat(ARMOR_SCALE_FACTOR);
     buf.writeBoolean(IS_ENTITIES_WHITELIST);
     buf.writeBoolean(CAN_CLIMB);
+    buf.writeBoolean(MOUNTED_ONLY);
 
     buf.writeInt(TL_BLOCKS.size());
     for (ResourceLocation block : TL_BLOCKS) {
@@ -57,7 +59,9 @@ public class SyncConfigS2CPacket {
   }
 
   public void handle(Supplier<NetworkEvent.Context> context) {
-    context.get().enqueueWork(() -> TraversableLeaves.configHasBeenPopulated = false);
+    context.get().enqueueWork(() -> {
+      TraversableLeaves.configHasBeenPopulated = false;
+    });
     context.get().setPacketHandled(true);
   }
 }

@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @SuppressWarnings("unused")
 @Mixin(PistonMovingBlockEntity.class)
 public class PistonMovingBlockEntityMixin {
-
   @Inject(
       method = "getCollisionRelatedBlockState",
       at = @At("RETURN"),
@@ -23,6 +22,3 @@ public class PistonMovingBlockEntityMixin {
       cir.setReturnValue(Blocks.AIR.defaultBlockState());
   }
 }
-
-
-

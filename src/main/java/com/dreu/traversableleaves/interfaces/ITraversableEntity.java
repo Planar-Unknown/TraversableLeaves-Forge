@@ -10,6 +10,7 @@ import static com.dreu.traversableleaves.config.TLConfig.*;
 public interface ITraversableEntity {
 
   static boolean canTraverse(Entity entity) {
+    if (MOUNTED_ONLY && !(entity.isPassenger() || entity.hasControllingPassenger())) return false;
     return IS_ENTITIES_WHITELIST == TL_ENTITIES.contains(ForgeRegistries.ENTITY_TYPES.getKey(entity.getType()));
   }
 

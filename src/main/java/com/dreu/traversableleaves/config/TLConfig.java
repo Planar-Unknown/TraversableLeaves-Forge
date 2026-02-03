@@ -42,6 +42,9 @@ public class TLConfig {
       # Whether leaves behave like ladders | Default: true
       CanClimb = true
       
+      # Whether Leaves can only be traversed while mounted | Default: false
+      MountedOnly = false
+      
       # List of traversable blocks. | Default: ["#minecraft:leaves"]
       Traversable=[
        "#minecraft:leaves"
@@ -54,6 +57,7 @@ public class TLConfig {
       Entities=[
       ]
       """;
+
   public static void repairConfig() {
     LOGGER.info("An issue was found with config: {} | You can find a copy of faulty config at: {} | Repairing...", fileName, fileName.replace(".toml", "_faulty.toml"));
     Path sourcePath = Paths.get(fileName);
@@ -81,6 +85,10 @@ public class TLConfig {
           .append("# Whether leaves behave like ladders\n")
           .append("CanClimb = ")
           .append(CAN_CLIMB)
+          .append("\n\n")
+          .append("# Whether Leaves can only be traversed while mounted | Default: false\n")
+          .append("MountedOnly = ")
+          .append(MOUNTED_ONLY)
           .append("\n\n")
           .append("# List of traversable blocks | Default: [\"#minecraft:leaves\"]\n")
           .append("Traversable = [\n");
@@ -121,6 +129,7 @@ public class TLConfig {
   private static int CACHED_ARMOR_CAP;
   public static float ARMOR_SCALE_FACTOR;
   public static boolean CAN_CLIMB;
+  public static boolean MOUNTED_ONLY;
 
   public static void parse() {
     CONFIG = parseConfigOrDefault();
@@ -152,6 +161,7 @@ public class TLConfig {
     ARMOR_SCALE_FACTOR = CACHED_ARMOR_HELPS ? (1 - MOVEMENT_MULTIPLIER) * (1.0f / CACHED_ARMOR_CAP) : 0;
     IS_ENTITIES_WHITELIST = getWhitelistBlacklist();
     CAN_CLIMB = getOrDefault("CanClimb", Boolean.class);
+    MOUNTED_ONLY = getOrDefault("MountedOnly", Boolean.class);
 
     Set<ResourceLocation> toRemove = new HashSet<>();
     ((List<String>) getOrDefault("Traversable", List.class)).forEach((configKey) -> {
