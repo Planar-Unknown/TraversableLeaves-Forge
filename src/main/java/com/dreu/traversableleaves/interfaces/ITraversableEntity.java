@@ -3,7 +3,6 @@ package com.dreu.traversableleaves.interfaces;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import static com.dreu.traversableleaves.config.TLConfig.*;
 
@@ -11,7 +10,7 @@ public interface ITraversableEntity {
 
   static boolean canTraverse(Entity entity) {
     if (MOUNTED_ONLY && !(entity.isPassenger() || entity.hasControllingPassenger())) return false;
-    return IS_ENTITIES_WHITELIST == TL_ENTITIES.contains(ForgeRegistries.ENTITY_TYPES.getKey(entity.getType()));
+    return IS_ENTITIES_WHITELIST == TL_ENTITIES.contains(entity.getType());
   }
 
   default float getArmorBonus() {

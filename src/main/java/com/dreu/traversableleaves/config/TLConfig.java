@@ -116,8 +116,8 @@ public class TLConfig {
   private static final Config DEFAULT_CONFIG = new TomlParser().parse(DEFAULT_CONFIG_STRING);
   private static Config CONFIG;
 
-  public static final Set<ResourceLocation> TL_BLOCKS = new HashSet<>();
-  public static final Set<ResourceLocation> TL_ENTITIES = new HashSet<>();
+  public static final Set<Block> TL_BLOCKS = new HashSet<>();
+  public static final Set<EntityType<?>> TL_ENTITIES = new HashSet<>();
 
   private static final Set<String> BLOCKS_CACHE = new HashSet<>();
   private static final Set<String> ENTITIES_CACHE = new HashSet<>();
@@ -163,51 +163,51 @@ public class TLConfig {
     CAN_CLIMB = getOrDefault("CanClimb", Boolean.class);
     MOUNTED_ONLY = getOrDefault("MountedOnly", Boolean.class);
 
-    Set<ResourceLocation> toRemove = new HashSet<>();
+    Set<Block> blocksToRemove = new HashSet<>();
     ((List<String>) getOrDefault("Traversable", List.class)).forEach((configKey) -> {
       BLOCKS_CACHE.add(configKey);
       if (configKey.startsWith("-")) {
         if (configKey.charAt(1) == '#') {
           if (isValidBlockTag(configKey.substring(2))) {
             for (Block block : ForgeRegistries.BLOCKS.tags().getTag(BlockTags.create(new ResourceLocation(configKey.substring(2)))))
-              toRemove.add(ForgeRegistries.BLOCKS.getKey(block));
+              blocksToRemove.add(block);
           }
         } else if (isValidBlock(configKey.substring(1))) {
-          toRemove.add(new ResourceLocation(configKey.substring(1)));
+          blocksToRemove.add(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(configKey.substring(1))));
         }
       } else if (configKey.startsWith("#")) {
         if (isValidBlockTag(configKey.substring(1))) {
           for (Block block : ForgeRegistries.BLOCKS.tags().getTag(BlockTags.create(new ResourceLocation(configKey.substring(1)))))
-            TL_BLOCKS.add(ForgeRegistries.BLOCKS.getKey(block));
+            TL_BLOCKS.add(block);
         }
       } else if (isValidBlock(configKey)) {
-        TL_BLOCKS.add(new ResourceLocation(configKey));
+        TL_BLOCKS.add(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(configKey)));
       }
     });
-    TL_BLOCKS.removeAll(toRemove);
+    TL_BLOCKS.removeAll(blocksToRemove);
 
-    toRemove.clear();
+    Set<EntityType<?>> entitiesToRemove = new HashSet<>();
     ((List<String>) getOrDefault("Entities", List.class)).forEach((configKey) -> {
       ENTITIES_CACHE.add(configKey);
       if (configKey.startsWith("-")) {
         if (configKey.charAt(1) == '#') {
           if (isValidEntityTag(configKey.substring(2))) {
             for (EntityType<?> entityType : ForgeRegistries.ENTITY_TYPES.tags().getTag(TagKey.create(ForgeRegistries.ENTITY_TYPES.getRegistryKey(), new ResourceLocation(configKey.substring(2)))))
-              toRemove.add(ForgeRegistries.ENTITY_TYPES.getKey(entityType));
+              entitiesToRemove.add(entityType);
           }
         } else if (isValidEntity(configKey.substring(1))) {
-          toRemove.add(new ResourceLocation(configKey.substring(1)));
+          entitiesToRemove.add(ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(configKey.substring(1))));
         }
       } else if (configKey.startsWith("#")) {
         if (isValidEntityTag(configKey.substring(1))) {
           for (EntityType<?> entityType : ForgeRegistries.ENTITY_TYPES.tags().getTag(TagKey.create(ForgeRegistries.ENTITY_TYPES.getRegistryKey(), new ResourceLocation(configKey.substring(1)))))
-            TL_ENTITIES.add(ForgeRegistries.ENTITY_TYPES.getKey(entityType));
+            TL_ENTITIES.add(entityType);
         }
       } else if (isValidEntity(configKey)) {
-        TL_ENTITIES.add(new ResourceLocation(configKey));
+        TL_ENTITIES.add(ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(configKey)));
       }
     });
-    TL_ENTITIES.removeAll(toRemove);
+    TL_ENTITIES.removeAll(entitiesToRemove);
 
     if (configNeedsRepair) repairConfig();
   }

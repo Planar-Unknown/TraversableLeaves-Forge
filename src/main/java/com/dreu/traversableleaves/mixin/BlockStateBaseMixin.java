@@ -49,8 +49,9 @@ public abstract class BlockStateBaseMixin {
         if (entityContext.getEntity() instanceof LivingEntity livingEntity) {
           if (livingEntity instanceof Player player && player.isCreative() && player.getAbilities().flying)
             cir.setReturnValue(Shapes.empty());
-          if (context.isAbove(getBlock().getCollisionShape(asState(), level, blockPos, context), blockPos, false) && !context.isDescending())
-            cir.setReturnValue(getBlock().getCollisionShape(asState(), level, blockPos, context));
+          VoxelShape shape = getBlock().getCollisionShape(asState(), level, blockPos, context);
+          if (context.isAbove(shape, blockPos, false) && !context.isDescending())
+            cir.setReturnValue(shape);
           else if (canTraverse(livingEntity)) {
             cir.setReturnValue(Shapes.empty());
           }
@@ -59,7 +60,7 @@ public abstract class BlockStateBaseMixin {
         }
       }
     }
-  }
+  } 
 
   @Shadow
   protected abstract BlockState asState();
